@@ -1,57 +1,81 @@
-using Dot.Net.WebApi.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Ressource;
+using P7CreateRestApi.Service.Interfaces;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class CurveController : ControllerBase
     {
-        // TODO: Inject Curve Point service
+        private readonly ICurvePointService _curvePointService;
 
-        [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        public CurveController(ICurvePointService curvePointService)
         {
-            return Ok();
+            _curvePointService = curvePointService;
         }
 
-        [HttpGet]
-        [Route("add")]
-        public IActionResult AddCurvePoint([FromBody]CurvePoint curvePoint)
+
+        // GET : All CurvePoint
+        [HttpGet("List")]
+        public async Task<IActionResult> GetAllCurvePoint()
         {
-            return Ok();
+            IEnumerable<CurvePoint> curvePoint = await _curvePointService.GetAllCurvePoint();
+            return Ok(curvePoint);
         }
 
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]CurvePoint curvePoint)
+        // GET : CurvePoint by ID
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> GetCurvePointById(int id)
         {
-            // TODO: check data valid and save to db, after saving return bid list
-            return Ok();
+            CurvePoint? curvePoint = await _curvePointService.GetCurvePointById(id);
+            if (curvePoint == null)
+                return NotFound(new { message = CurvePointModelRessources.CurvePointNotFound });
+
+            return Ok(curvePoint);
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
+        // POST : New CurvePoint
+        [HttpPost("Creation")]
+        public async Task<IActionResult> AddCurvePoint([FromBody] CurvePointModel curvePointModel)
         {
-            // TODO: get CurvePoint by Id and to model then show to the form
-            return Ok();
+            var result = await _curvePointService.AddCurvePoint(curvePointModel);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
+            return Ok(result.Data);
         }
 
-        [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateCurvePoint(int id, [FromBody] CurvePoint curvePoint)
+        // GET : CurvePointModel by ID for UpdateForm
+        [HttpGet("FormUpdate/{id}")]
+        public async Task<IActionResult> ShowUpdateForm(int id)
         {
-            // TODO: check required fields, if valid call service to update Curve and return Curve list
-            return Ok();
+            CurvePointModel? curvePointModel = await _curvePointService.GetCurvePointModelById(id);
+            if (curvePointModel == null)
+                return NotFound(new { message = CurvePointModelRessources.CurvePointNotFound });
+            return Ok(curvePointModel);
         }
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteBid(int id)
+        // PUT : Update CurvePoint with CurvePointModel
+        [HttpPut("Modification/{id}")]
+        public async Task<IActionResult> UpdateCurvePoint(int id, [FromBody] CurvePointModel curvePointModel)
         {
-            // TODO: Find Curve by Id and delete the Curve, return to Curve list
+            var result = await _curvePointService.UpdateCurvePoint(curvePointModel, id);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
+            return Ok(result.Data);
+        }
+
+        // DELETE : Delete CurvePoint by ID
+        [HttpDelete("Removal/{id}")]
+        public async Task<IActionResult> DeleteCurvePoint(int id)
+        {
+            bool success = await _curvePointService.DeleteCurvePoint(id);
+            if (!success)
+                return NotFound(new { message = CurvePointModelRessources.CurvePointNotFound });
             return Ok();
         }
     }

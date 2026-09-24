@@ -1,57 +1,81 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Ressource;
+using P7CreateRestApi.Service;
+using P7CreateRestApi.Service.Interfaces;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class RuleNameController : ControllerBase
     {
-        // TODO: Inject RuleName service
+        private readonly IRuleNameService _ruleNameService;
 
-        [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        public RuleNameController(IRuleNameService ruleNameService)
         {
-            // TODO: find all RuleName, add to model
-            return Ok();
+            _ruleNameService = ruleNameService;
         }
 
-        [HttpGet]
-        [Route("add")]
-        public IActionResult AddRuleName([FromBody]RuleName trade)
+        // GET : All RuleName
+        [HttpGet("List")]
+        public async Task<IActionResult> GetAllRuleName()
         {
-            return Ok();
+            IEnumerable<RuleName> ruleNames = await _ruleNameService.GetAllRuleName();
+            return Ok(ruleNames);
         }
 
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]RuleName trade)
+        // GET : RuleName by ID
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> GetRuleNameById(int id)
         {
-            // TODO: check data valid and save to db, after saving return RuleName list
-            return Ok();
+            RuleName? ruleName = await _ruleNameService.GetRuleNameById(id);
+            if (ruleName == null)
+                return NotFound(new { message = RuleNameModelRessources.RuleNameNotFound });
+
+            return Ok(ruleName);
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
+        // POST : New RuleName
+        [HttpPost("Creation")]
+        public async Task<IActionResult> AddRuleName([FromBody] RuleNameModel ruleNameModel)
         {
-            // TODO: get RuleName by Id and to model then show to the form
-            return Ok();
+            var result = await _ruleNameService.AddRuleName(ruleNameModel);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
+            return Ok(result.Data);
         }
 
-        [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateRuleName(int id, [FromBody] RuleName rating)
+        // GET : RuleNameModel by ID for UpdateForm
+        [HttpGet("FormUpdate/{id}")]
+        public async Task<IActionResult> ShowUpdateForm(int id)
         {
-            // TODO: check required fields, if valid call service to update RuleName and return RuleName list
-            return Ok();
+            RuleNameModel? ruleNameModel = await _ruleNameService.GetRuleNameModelById(id);
+            if (ruleNameModel == null)
+                return NotFound(new { message = RuleNameModelRessources.RuleNameNotFound });
+            return Ok(ruleNameModel);
         }
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteRuleName(int id)
+        // PUT : Update RuleName with RuleNameModel
+        [HttpPut("Modification/{id}")]
+        public async Task<IActionResult> UpdateRating(int id, [FromBody] RuleNameModel ruleNameModel)
         {
-            // TODO: Find RuleName by Id and delete the RuleName, return to Rule list
+            var result = await _ruleNameService.UpdateRuleName(ruleNameModel, id);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
+            return Ok(result.Data);
+        }
+
+        // DELETE : Delete RuleName by ID
+        [HttpDelete("Removal/{id}")]
+        public async Task<IActionResult> DeleteRating(int id)
+        {
+            bool success = await _ruleNameService.DeleteRuleName(id);
+            if (!success)
+                return NotFound(new { message = RuleNameModelRessources.RuleNameNotFound });
             return Ok();
         }
     }
