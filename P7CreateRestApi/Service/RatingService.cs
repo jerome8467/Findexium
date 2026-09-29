@@ -1,4 +1,5 @@
-﻿using P7CreateRestApi.Domain;
+﻿using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Repositories.Interfaces;
 using P7CreateRestApi.Ressource;
@@ -23,12 +24,12 @@ namespace P7CreateRestApi.Service
 
         public async Task<Rating?> GetRatingById(int id)
         {
-            return await GetRatingById(id);
+            return await _ratingRepository.GetRatingById(id);
         }
 
         public async Task<RatingModel?> GetRatingModelById(int id)
         {
-            Rating? rating = await GetRatingById(id);
+            Rating? rating = await _ratingRepository.GetRatingById(id);
             if (rating == null)
                 return null;
             return MappingRatingForModel(rating);
@@ -41,7 +42,7 @@ namespace P7CreateRestApi.Service
             if (!Validator.TryValidateObject(ratingModel, context, result.Errors, true))
                 return result;
 
-            Rating rating = MappingRatingModelForDatabase(ratingModel);
+            Rating rating = MappingRatingModelForDatabase(ratingModel, new Rating());
 
             await _ratingRepository.AddRating(rating);
 
@@ -56,34 +57,41 @@ namespace P7CreateRestApi.Service
             if (!Validator.TryValidateObject(ratingModel, context, result.Errors, true))
                 return result;
 
-            Rating rating = MappingRatingModelForDatabase(ratingModel);
-            rating.Id = id;
-
-            bool succes = await _ratingRepository.UpdateRating(rating);
-            if (!succes)
+            Rating? findRating = await _ratingRepository.GetRatingById(id);
+            if(findRating == null)
             {
                 result.Errors.Add(new ValidationResult(RatingModelRessources.RatingNotFound));
                 return result;
             }
 
-            result.Data = rating;
+            findRating = MappingRatingModelForDatabase(ratingModel, findRating);
+
+            await _ratingRepository.UpdateRating(findRating);
+
+            result.Data = findRating;
             return result;
         }
 
-        public async Task<bool> DeleteRating(int id)
+        public async Task<List<ValidationResult>> DeleteRating(int id)
         {
-            return await _ratingRepository.DeleteRating(id);
+            List<ValidationResult> result = new List<ValidationResult>();
+
+            Rating? findRating = await _ratingRepository.GetRatingById(id);
+            if (findRating == null)
+            {
+                result.Add(new ValidationResult(RatingModelRessources.RatingNotFound));
+                return result;
+            }
+            await _ratingRepository.DeleteRating(findRating);
+            return result;
         }
 
-        private Rating MappingRatingModelForDatabase(RatingModel ratingModel)
+        private Rating MappingRatingModelForDatabase(RatingModel ratingModel, Rating rating)
         {
-            Rating rating = new Rating
-            {
-                MoodysRating = ratingModel.MoodysRating,
-                SandPRating = ratingModel.SandPRating,
-                FitchRating = ratingModel.FitchRating,
-                OrderNumber = ratingModel.OrderNumber
-            };
+            rating.MoodysRating = ratingModel.MoodysRating;
+            rating.SandPRating = ratingModel.SandPRating;
+            rating.FitchRating = ratingModel.FitchRating;
+            rating.OrderNumber = (byte?)ratingModel.OrderNumber;
 
             return rating;
         }

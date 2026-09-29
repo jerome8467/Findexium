@@ -30,28 +30,16 @@ namespace P7CreateRestApi.Repositories
             await _DbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> UpdateCurvePoint(CurvePoint curvePoint)
+        public async Task UpdateCurvePoint(CurvePoint curvePoint)
         {
-            CurvePoint? findCurvePoint = await GetCurvePointById(curvePoint.Id);
-            if (findCurvePoint == null)
-                return false;
-
-            _DbContext.Entry(findCurvePoint).CurrentValues.SetValues(curvePoint);
+            _DbContext.Update(curvePoint);
             await _DbContext.SaveChangesAsync();
-            return true;
         }
 
-        public async Task<bool> DeleteCurvePoint(int id)
+        public async Task DeleteCurvePoint(CurvePoint curvePoint)
         {
-            CurvePoint? findCurvePoint = await GetCurvePointById(id);
-            if (findCurvePoint == null)
-                return false;
-
-            _DbContext.curvePoints.Remove(findCurvePoint);
+            _DbContext.curvePoints.Remove(curvePoint);
             await _DbContext.SaveChangesAsync();
-            return true;
         }
-
-
     }
 }

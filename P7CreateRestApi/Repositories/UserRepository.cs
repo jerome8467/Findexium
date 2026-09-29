@@ -37,41 +37,16 @@ namespace P7CreateRestApi.Repositories
             await _DbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> UpdateUser(User user)
+        public async Task UpdateUser(User user)
         {
-            User? findUser = await GetUserById(user.Id);
-            if (findUser == null)
-                return false;
-
-            findUser.Username = user.Username;
-            findUser.Fullname = user.Fullname;
-            findUser.Role = user.Role;
+            _DbContext.Update(user);
             await _DbContext.SaveChangesAsync();
-            return true;
-
         }
 
-        public async Task<bool> ChangePassword(string newPassword, int id)
+        public async Task DeleteUser(User user)
         {
-            User? findUser = await GetUserById(id);
-            if (findUser == null)
-                return false;
-
-            findUser.Password = newPassword;
+            _DbContext.Users.Remove(user);
             await _DbContext.SaveChangesAsync();
-            return true;
-
-        }
-
-        public async Task<bool> DeleteUser(int id)
-        {
-            User? deletedUser = await GetUserById(id);
-            if (deletedUser == null) 
-                return false;
-
-            _DbContext.Users.Remove(deletedUser);
-            await _DbContext.SaveChangesAsync();
-                return true;
         }
 
 

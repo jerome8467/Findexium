@@ -33,26 +33,17 @@ namespace P7CreateRestApi.Repositories
             await _DbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> UpdateTrade(Trade trade)
+        public async Task UpdateTrade(Trade trade)
         {
-            Trade? findTrade = await GetTradeById(trade.TradeId);
-            if (findTrade == null)
-                return false;
-
-            _DbContext.Entry(findTrade).CurrentValues.SetValues(trade);
+            _DbContext.Update(trade);
             await _DbContext.SaveChangesAsync();
-            return true;
         }
 
-        public async Task<bool> DeleteTrade(int id)
+        public async Task DeleteTrade(Trade trade)
         {
-            Trade? findTrade = await GetTradeById(id);
-            if (findTrade == null)
-                return false;
-
-            _DbContext.Trades.Update(findTrade);
+            _DbContext.Trades.Remove(trade);
             await _DbContext.SaveChangesAsync();
-            return true;
+
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using P7CreateRestApi.Domain;
+﻿using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Repositories.Interfaces;
 using P7CreateRestApi.Ressource;
@@ -41,7 +42,7 @@ namespace P7CreateRestApi.Service
             if (!Validator.TryValidateObject(curvePointModel, context, result.Errors, true))
                 return result;
 
-            CurvePoint curvePoint = MappingCurvePointModelForDatabase(curvePointModel);
+            CurvePoint curvePoint = MappingCurvePointModelForDatabase(curvePointModel, new CurvePoint());
             curvePoint.CreationDate = DateTime.Now;
 
             await _curvePointRepository.AddCurvePoint(curvePoint);
@@ -57,36 +58,43 @@ namespace P7CreateRestApi.Service
             if (!Validator.TryValidateObject(curvePointModel, context, result.Errors, true))
                 return result;
 
-            CurvePoint curvePoint = MappingCurvePointModelForDatabase(curvePointModel);
-            curvePoint.Id = id;
-            curvePoint.CreationDate = DateTime.Now;
-
-            bool succes = await _curvePointRepository.UpdateCurvePoint(curvePoint);
-            if(!succes)
+            CurvePoint? findCurvePoint = await _curvePointRepository.GetCurvePointById(id);
+            if(findCurvePoint == null)
             {
                 result.Errors.Add(new ValidationResult(CurvePointModelRessources.CurvePointNotFound));
-                return result;   
-
+                return result;
             }
 
-            result.Data = curvePoint;
+            findCurvePoint = MappingCurvePointModelForDatabase(curvePointModel, findCurvePoint);
+
+            await _curvePointRepository.UpdateCurvePoint(findCurvePoint);
+
+            result.Data = findCurvePoint;
             return result;
         }
 
-        public async Task<bool> DeleteCurvePoint(int id)
+        public async Task<List<ValidationResult>> DeleteCurvePoint(int id)
         {
-            return await _curvePointRepository.DeleteCurvePoint(id);
+            List<ValidationResult> result = new List<ValidationResult>();
+
+            CurvePoint? findCurvePoint = await _curvePointRepository.GetCurvePointById(id);
+            if (findCurvePoint == null)
+            {
+                result.Add(new ValidationResult(CurvePointModelRessources.CurvePointNotFound));
+                return result;
+            }
+
+            await _curvePointRepository.DeleteCurvePoint(findCurvePoint);
+            return result;
         }
 
-        private CurvePoint MappingCurvePointModelForDatabase(CurvePointModel curvePointModel)
+        private CurvePoint MappingCurvePointModelForDatabase(CurvePointModel curvePointModel, CurvePoint curvePoint)
         {
-            CurvePoint curvePoint = new CurvePoint
-            {
-                CurveId = curvePointModel.CurveId,
-                AsOfDate = curvePointModel.AsOfDate,
-                Term = curvePointModel.Term,
-                CurvePointValue = curvePointModel.CurvePointValue
-            };
+
+            curvePoint.CurveId = (byte?)curvePointModel.CurveId;
+            curvePoint.AsOfDate = curvePointModel.AsOfDate;
+            curvePoint.Term = curvePointModel.Term;
+            curvePoint.CurvePointValue = curvePointModel.CurvePointValue;
 
             return curvePoint;
         }

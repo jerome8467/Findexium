@@ -16,7 +16,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpPost]
-        [Route("login")]
+        [Route("Access")]
         public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
         {
             string? token = await _userService.Login(loginModel);

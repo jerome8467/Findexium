@@ -11,6 +11,6 @@ namespace P7CreateRestApi.Service.Interfaces
         public Task<BidListModel?> GetBidListModelById(int id);
         public Task<ServiceResult<BidList>> AddBidList(BidListModel bidlistModel, string userName);
         public Task<ServiceResult<BidList>> UpdateBidList(BidListModel bidlistModel, string userName, int id);
-        public Task<bool> DeleteBidList(int id);
+        public Task<List<ValidationResult>> DeleteBidList(int id);
     }
 }

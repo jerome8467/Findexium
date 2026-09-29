@@ -26,6 +26,10 @@ namespace P7CreateRestApi.Ressource
         {
             get { return resourceManager.GetString("RatingNotFound", cultureInfo) ?? string.Empty; }
         }
+        public static string OrderNumberRange
+        {
+            get { return resourceManager.GetString("OrderNumberRange", cultureInfo) ?? string.Empty; }
+        }
 
     }
 }

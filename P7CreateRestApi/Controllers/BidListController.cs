@@ -4,6 +4,7 @@ using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -64,7 +65,6 @@ namespace P7CreateRestApi.Controllers
         [HttpPut("Modification/{id}")]
         public async Task<IActionResult> UpdateBidList(int id, [FromBody] BidListModel bidListModel)
         {
-            // TODO: check required fields, if valid call service to update Bid and return list Bid
             string username = User.Identity!.Name!;
             var result = await _BidListService.UpdateBidList(bidListModel, username, id);
             if (result.Errors.Any())
@@ -76,9 +76,9 @@ namespace P7CreateRestApi.Controllers
         [HttpDelete("Removal/{id}")]
         public async Task<IActionResult> DeleteBidList(int id)
         {
-            bool success = await _BidListService.DeleteBidList(id);
-            if(!success)
-                return NotFound(new { message = BidListModelRessources.BidListNotFound });
+            List<ValidationResult> errors = await _BidListService.DeleteBidList(id);
+            if (errors.Any())
+                return NotFound(errors);
             return Ok();
         }
     }

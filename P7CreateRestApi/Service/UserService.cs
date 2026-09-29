@@ -96,46 +96,12 @@ namespace P7CreateRestApi.Service
             return result;
         }
 
-        public async Task<ServiceResult<UserDto>> UpdateUser(UpdateUserModel updateUserModel, int id)
+        public async Task<ServiceResult<UserDto>> UpdateUser(UpdateUserModel model, int id)
         {
-            ValidationContext context = new ValidationContext(updateUserModel);
+            ValidationContext context = new ValidationContext(model);
             var result = new ServiceResult<UserDto>();
 
-            if (!Validator.TryValidateObject(updateUserModel, context, result.Errors, true))
-                return result;
-
-            User? findUser = await _userRepository.GetUserByUsername(updateUserModel.Username);
-            if (findUser != null && findUser.Id != id)
-            {
-                result.Errors.Add(new ValidationResult(UserModelRessources.UsernameUnavailable));
-                return result;
-            }
-
-            User user = new User
-            {
-                Id = id,
-                Username = updateUserModel.Username,
-                Fullname = updateUserModel.Fullname,
-                Role = updateUserModel.Role
-            };
-
-            bool success = await _userRepository.UpdateUser(user);
-            if (!success)
-            {
-                result.Errors.Add(new ValidationResult(UserModelRessources.UserNotFound));
-                return result;
-            }
-
-            result.Data = MappingUserToDto(user);
-            return result;
-        }
-
-        public async Task<ServiceResult<UserDto>> ChangePassword(ChangePasswordModel changePasswordModel, int id)
-        {
-            var result = new ServiceResult<UserDto>();
-            ValidationContext context = new ValidationContext(changePasswordModel);
-
-            if (!Validator.TryValidateObject(changePasswordModel, context, result.Errors, true))
+            if (!Validator.TryValidateObject(model, context, result.Errors, true))
                 return result;
 
             User? findUser = await _userRepository.GetUserById(id);
@@ -145,23 +111,65 @@ namespace P7CreateRestApi.Service
                 return result;
             }
 
-            var verifyOldPassword = _passwordHasher.VerifyHashedPassword(findUser, findUser.Password, changePasswordModel.OldPassword);
+            User? sameUsername = await _userRepository.GetUserByUsername(model.Username);
+            if (sameUsername != null && sameUsername.Id != id)
+            {
+                result.Errors.Add(new ValidationResult(UserModelRessources.UsernameUnavailable));
+                return result;
+            }
+
+            findUser.Username = model.Username;
+            findUser.Fullname = model.Fullname;
+            findUser.Role = model.Role;
+
+            await _userRepository.UpdateUser(findUser);
+
+            result.Data = MappingUserToDto(findUser);
+            return result;
+        }
+
+        public async Task<ServiceResult<UserDto>> ChangePassword(ChangePasswordModel changePassword, int id)
+        {
+            var result = new ServiceResult<UserDto>();
+            ValidationContext context = new ValidationContext(changePassword);
+
+            if (!Validator.TryValidateObject(changePassword, context, result.Errors, true))
+                return result;
+
+            User? findUser = await _userRepository.GetUserById(id);
+            if (findUser == null)
+            {
+                result.Errors.Add(new ValidationResult(UserModelRessources.UserNotFound));
+                return result;
+            }
+
+            var verifyOldPassword = _passwordHasher.VerifyHashedPassword(findUser, findUser.Password, changePassword.OldPassword);
             if (verifyOldPassword == PasswordVerificationResult.Failed)
             {
                 result.Errors.Add(new ValidationResult(UserModelRessources.OldPasswordIncorrect));
                 return result;
             }
 
-            string newPassowrd = _passwordHasher.HashPassword(findUser, changePasswordModel.NewPassword);
-            await _userRepository.ChangePassword(newPassowrd, id);
+            findUser.Password = _passwordHasher.HashPassword(findUser, changePassword.NewPassword);
+            await _userRepository.UpdateUser(findUser);
 
             result.Data = MappingUserToDto(findUser);
             return result;
         }
 
-        public async Task<bool> DeleteUser(int id)
+        public async Task<List<ValidationResult>> DeleteUser(int id)
         {
-            return await _userRepository.DeleteUser(id);
+            List<ValidationResult> result = new List<ValidationResult>();
+
+            User? findUser = await _userRepository.GetUserById(id);
+            if (findUser == null)
+            {
+                result.Add(new ValidationResult(UserModelRessources.UserNotFound));
+                return result;
+            }
+
+            await _userRepository.DeleteUser(findUser);
+            return result;
         }
 
         public async Task<string?> Login(LoginModel loginModel)

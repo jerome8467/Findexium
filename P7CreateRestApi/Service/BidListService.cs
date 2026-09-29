@@ -42,7 +42,7 @@ namespace P7CreateRestApi.Service
             if (!Validator.TryValidateObject(bidlistModel, context, result.Errors, true))
                 return result;
 
-            BidList bidList = MappingBidListModelForDatabase(bidlistModel);
+            BidList bidList = MappingBidListModelForDatabase(bidlistModel, new BidList());
 
             bidList.CreationName = userName;
             bidList.CreationDate = DateTime.Now;
@@ -63,49 +63,57 @@ namespace P7CreateRestApi.Service
             if (!Validator.TryValidateObject(bidlistModel, context, result.Errors, true))
                 return result;
 
-            BidList bidList = MappingBidListModelForDatabase(bidlistModel);
-            bidList.BidListId = id;
-            bidList.RevisionName = userName;
-            bidList.RevisionDate = DateTime.Now;
-
-            bool success = await _bidListRepository.UpdateBidList(bidList);
-            if (!success)
+            BidList? findBidList = await _bidListRepository.GetBidLIstById(id);
+            if (findBidList == null)
             {
                 result.Errors.Add(new ValidationResult(BidListModelRessources.BidListNotFound));
                 return result;
             }
 
-            result.Data = bidList;
+            findBidList = MappingBidListModelForDatabase(bidlistModel, findBidList);
+            findBidList.RevisionName = userName;
+            findBidList.RevisionDate = DateTime.Now;
+
+            await _bidListRepository.UpdateBidList(findBidList);
+
+            result.Data = findBidList;
             return result;
         }
 
-        public async Task<bool> DeleteBidList(int id)
+        public async Task<List<ValidationResult>> DeleteBidList(int id)
         {
-            return await _bidListRepository.DeleteBidList(id);
+            List<ValidationResult> result = new List<ValidationResult>();
+
+            BidList? findBidList = await _bidListRepository.GetBidLIstById(id);
+            if (findBidList == null)
+            {
+                result.Add(new ValidationResult(BidListModelRessources.BidListNotFound));
+                return result;
+            }
+
+            await _bidListRepository.DeleteBidList(findBidList);
+            return result;
         }
 
-        private BidList MappingBidListModelForDatabase(BidListModel bidlistModel)
+        private BidList MappingBidListModelForDatabase(BidListModel bidlistModel, BidList bidList)
         {
-            BidList bidList = new BidList
-            {
-                Account = bidlistModel.Account,
-                BidType = bidlistModel.BidType,
-                BidQuantity = bidlistModel.BidQuantity,
-                AskQuantity = bidlistModel.AskQuantity,
-                Bid = bidlistModel.Bid,
-                Ask = bidlistModel.Ask,
-                Benchmark = bidlistModel.Benchmark,
-                BidListDate = bidlistModel.BidListDate,
-                Commentary = bidlistModel.Commentary,
-                BidSecurity = bidlistModel.BidSecurity,
-                BidStatus = bidlistModel.BidStatus,
-                Trader = bidlistModel.Trader,
-                Book = bidlistModel.Book,
-                DealName = bidlistModel.DealName,
-                DealType = bidlistModel.DealType,
-                SourceListId = bidlistModel.SourceListId,
-                Side = bidlistModel.Side
-            };
+            bidList.Account = bidlistModel.Account;
+            bidList.BidType = bidlistModel.BidType;
+            bidList.BidQuantity = bidlistModel.BidQuantity;
+            bidList.AskQuantity = bidlistModel.AskQuantity;
+            bidList.Bid = bidlistModel.Bid;
+            bidList.Ask = bidlistModel.Ask;
+            bidList.Benchmark = bidlistModel.Benchmark;
+            bidList.BidListDate = bidlistModel.BidListDate;
+            bidList.Commentary = bidlistModel.Commentary;
+            bidList.BidSecurity = bidlistModel.BidSecurity;
+            bidList.BidStatus = bidlistModel.BidStatus;
+            bidList.Trader = bidlistModel.Trader;
+            bidList.Book = bidlistModel.Book;
+            bidList.DealName = bidlistModel.DealName;
+            bidList.DealType = bidlistModel.DealType;
+            bidList.SourceListId = bidlistModel.SourceListId;
+            bidList.Side = bidlistModel.Side;
             
             return bidList;
         }

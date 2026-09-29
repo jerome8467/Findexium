@@ -1,4 +1,5 @@
-﻿using P7CreateRestApi.Domain;
+﻿using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Repositories.Interfaces;
 using P7CreateRestApi.Ressource;
@@ -23,12 +24,12 @@ namespace P7CreateRestApi.Service
 
         public async Task<RuleName?> GetRuleNameById(int id)
         {
-            return await GetRuleNameById(id);
+            return await _ruleNameRepository.GetRuleNameById(id);
         }
 
         public async Task<RuleNameModel?> GetRuleNameModelById(int id)
         {
-            RuleName? ruleName = await GetRuleNameById(id);
+            RuleName? ruleName = await _ruleNameRepository.GetRuleNameById(id);
             if (ruleName == null)
                 return null;
             return MappingRuleNameForModel(ruleName);
@@ -42,7 +43,7 @@ namespace P7CreateRestApi.Service
             if(!Validator.TryValidateObject(ruleNameModel, context, result.Errors, true))
                 return result;
 
-            RuleName ruleName = MappingRuleNameModelForDatabase(ruleNameModel);
+            RuleName ruleName = MappingRuleNameModelForDatabase(ruleNameModel, new RuleName());
             await _ruleNameRepository.AddRuleName(ruleName);
             result.Data = ruleName;
             return result;
@@ -56,37 +57,43 @@ namespace P7CreateRestApi.Service
             if (!Validator.TryValidateObject(ruleNameModel, context, result.Errors, true))
                 return result;
 
-            RuleName ruleName = MappingRuleNameModelForDatabase(ruleNameModel);
-            ruleName.Id = id;
-
-            bool success = await _ruleNameRepository.UpdateRuleName(ruleName);
-            if (!success)
+            RuleName? findRuleName = await _ruleNameRepository.GetRuleNameById(id);
+            if(findRuleName == null)
             {
                 result.Errors.Add(new ValidationResult(RuleNameModelRessources.RuleNameNotFound));
                 return result;
             }
 
-            result.Data = ruleName;
+            findRuleName = MappingRuleNameModelForDatabase(ruleNameModel, findRuleName);
+
+            await _ruleNameRepository.UpdateRuleName(findRuleName);
+
+            result.Data = findRuleName;
             return result;
-
         }
 
-        public async Task<bool> DeleteRuleName(int id)
+        public async Task<List<ValidationResult>> DeleteRuleName(int id)
         {
-            return await _ruleNameRepository.DeleteRuleName(id);
-        }
+            List<ValidationResult> result = new List<ValidationResult>();
 
-        private RuleName MappingRuleNameModelForDatabase(RuleNameModel ruleNameModel)
-        {
-            RuleName ruleName = new RuleName
+            RuleName? findRuleName = await _ruleNameRepository.GetRuleNameById(id);
+            if (findRuleName == null)
             {
-                Name = ruleNameModel.Name,
-                Description = ruleNameModel.Description,
-                Json = ruleNameModel.Json,
-                Template = ruleNameModel.Template,
-                SqlStr = ruleNameModel.SqlStr,
-                SqlPart = ruleNameModel.SqlPart,
-            };
+                result.Add(new ValidationResult(RuleNameModelRessources.RuleNameNotFound));
+                return result;
+            }
+            await _ruleNameRepository.DeleteRuleName(findRuleName);
+            return result;
+        }
+
+        private RuleName MappingRuleNameModelForDatabase(RuleNameModel ruleNameModel, RuleName ruleName)
+        {
+            ruleName.Name = ruleNameModel.Name;
+            ruleName.Description = ruleNameModel.Description;
+            ruleName.Json = ruleNameModel.Json;
+            ruleName.Template = ruleNameModel.Template;
+            ruleName.SqlStr = ruleNameModel.SqlStr;
+            ruleName.SqlPart = ruleNameModel.SqlPart;
 
             return ruleName;
         }

@@ -5,6 +5,7 @@ using P7CreateRestApi.Models;
 using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service;
 using P7CreateRestApi.Service.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -74,11 +75,11 @@ namespace P7CreateRestApi.Controllers
 
         // DELETE : Delete Trade by ID
         [HttpDelete("Removal/{id}")]
-        public async Task<IActionResult> DeleteTrad(int id)
+        public async Task<IActionResult> DeleteTrade(int id)
         {
-            bool success = await _tradeService.DeleteTrade(id);
-            if(!success)
-                return NotFound(new {Message = TradeModelRessources.TradeNotFound});
+            List<ValidationResult> errors = await _tradeService.DeleteTrade(id);
+            if(errors.Any())
+                return NotFound(errors);
             return Ok();
         }
     }

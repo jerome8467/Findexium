@@ -11,6 +11,6 @@ namespace P7CreateRestApi.Service.Interfaces
         public Task<CurvePointModel?> GetCurvePointModelById(int id);
         public Task<ServiceResult<CurvePoint>> AddCurvePoint(CurvePointModel curvePointModel);
         public Task<ServiceResult<CurvePoint>> UpdateCurvePoint(CurvePointModel curvePointModel, int id);
-        public Task<bool> DeleteCurvePoint(int id);
+        public Task<List<ValidationResult>> DeleteCurvePoint(int id);
     }
 }

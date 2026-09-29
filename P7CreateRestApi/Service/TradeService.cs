@@ -41,7 +41,7 @@ namespace P7CreateRestApi.Service
             if(!Validator.TryValidateObject(tradeModel, context, result.Errors, true))
                 return result;
 
-            Trade trade = MappingTradeModelForDatabase(tradeModel);
+            Trade trade = MappingTradeModelForDatabase(tradeModel, new Trade());
             trade.CreationName = userName;
             trade.CreationDate = DateTime.Now;
             trade.RevisionName = userName;
@@ -61,47 +61,56 @@ namespace P7CreateRestApi.Service
             if (!Validator.TryValidateObject(tradeModel, context, result.Errors, true))
                 return result;
 
-            Trade trade = MappingTradeModelForDatabase(tradeModel);
-            trade.RevisionName = userName;
-            trade.RevisionDate = DateTime.Now;
-
-            bool success = await _tradeRepository.UpdateTrade(trade);
-            if (!success)
+            Trade? findTrade = await _tradeRepository.GetTradeById(id);
+            if (findTrade == null)
             {
                 result.Errors.Add(new ValidationResult(TradeModelRessources.TradeNotFound));
                 return result;
             }
+
+            findTrade = MappingTradeModelForDatabase(tradeModel, findTrade);
+            findTrade.RevisionName = userName;
+            findTrade.RevisionDate = DateTime.Now;
+
+            await _tradeRepository.UpdateTrade(findTrade);
                 
-            result.Data = trade;
+            result.Data = findTrade;
             return result;
         }
 
-        public async Task<bool> DeleteTrade(int id)
+        public async Task<List<ValidationResult>> DeleteTrade(int id)
         {
-            return await _tradeRepository.DeleteTrade(id);
+            List<ValidationResult> result = new List<ValidationResult>();
+
+            Trade? trade = await _tradeRepository.GetTradeById(id);
+            if(trade == null)
+            {
+                result.Add(new ValidationResult(TradeModelRessources.TradeNotFound));
+                return result;
+            }
+
+            await _tradeRepository.DeleteTrade(trade);
+            return result;
         }
 
-        private Trade MappingTradeModelForDatabase(TradeModel tradeModel)
+        private Trade MappingTradeModelForDatabase(TradeModel tradeModel, Trade trade)
         {
-            Trade trade = new Trade
-            {
-                Account = tradeModel.Account,
-                AccountType = tradeModel.AccountType,
-                BuyQuantity = tradeModel.BuyQuantity,
-                SellQuantity = tradeModel.SellQuantity,
-                BuyPrice = tradeModel.BuyPrice,
-                SellPrice = tradeModel.SellPrice,
-                TradeDate = tradeModel.TradeDate,
-                TradeSecurity = tradeModel.TradeSecurity,
-                TradeStatus = tradeModel.TradeStatus,
-                Trader = tradeModel.Trader,
-                Benchmark = tradeModel.Benchmark,
-                Book = tradeModel.Book,
-                DealName = tradeModel.DealName,
-                DealType = tradeModel.DealType,
-                SourceListId = tradeModel.SourceListId,
-                Side = tradeModel.Side,
-            };
+            trade.Account = tradeModel.Account;
+            trade.AccountType = tradeModel.AccountType;
+            trade.BuyQuantity = tradeModel.BuyQuantity;
+            trade.SellQuantity = tradeModel.SellQuantity;
+            trade.BuyPrice = tradeModel.BuyPrice;
+            trade.SellPrice = tradeModel.SellPrice;
+            trade.TradeDate = tradeModel.TradeDate;
+            trade.TradeSecurity = tradeModel.TradeSecurity;
+            trade.TradeStatus = tradeModel.TradeStatus;
+            trade.Trader = tradeModel.Trader;
+            trade.Benchmark = tradeModel.Benchmark;
+            trade.Book = tradeModel.Book;
+            trade.DealName = tradeModel.DealName;
+            trade.DealType = tradeModel.DealType;
+            trade.SourceListId = tradeModel.SourceListId;
+            trade.Side = tradeModel.Side;
 
             return trade;
         }

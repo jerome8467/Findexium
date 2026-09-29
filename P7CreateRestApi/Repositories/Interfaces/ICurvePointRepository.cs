@@ -7,8 +7,8 @@ namespace P7CreateRestApi.Repositories.Interfaces
         public Task<IEnumerable<CurvePoint>> GetAllCurvePoint();
         public Task<CurvePoint?> GetCurvePointById(int id);
         public Task AddCurvePoint(CurvePoint curvePoint);
-        public Task<bool> UpdateCurvePoint(CurvePoint curvePoint);
-        public Task<bool> DeleteCurvePoint(int id);
+        public Task UpdateCurvePoint(CurvePoint curvePoint);
+        public Task DeleteCurvePoint(CurvePoint curvePoint);
 
     }
 }

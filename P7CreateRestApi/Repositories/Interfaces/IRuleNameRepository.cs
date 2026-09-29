@@ -8,7 +8,7 @@ namespace P7CreateRestApi.Repositories.Interfaces
         public Task<IEnumerable<RuleName>> GetAllRuleName();
         public Task<RuleName?> GetRuleNameById(int id);
         public Task AddRuleName(RuleName ruleName);
-        public Task<bool> UpdateRuleName(RuleName ruleName);
-        public Task<bool> DeleteRuleName(int id);
+        public Task UpdateRuleName(RuleName ruleName);
+        public Task DeleteRuleName(RuleName ruleName);
     }
 }

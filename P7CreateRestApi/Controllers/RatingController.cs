@@ -6,6 +6,7 @@ using P7CreateRestApi.Models;
 using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service;
 using P7CreateRestApi.Service.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -74,9 +75,9 @@ namespace P7CreateRestApi.Controllers
         [HttpDelete("Removal/{id}")]
         public async Task<IActionResult> DeleteRating(int id)
         {
-            bool success = await _ratingService.DeleteRating(id);
-            if (!success)
-                return NotFound(new { message = RatingModelRessources.RatingNotFound });
+            List<ValidationResult> errors = await _ratingService.DeleteRating(id);
+            if (errors.Any())
+                return NotFound(errors);
             return Ok();
         }
     }

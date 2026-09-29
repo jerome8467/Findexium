@@ -12,7 +12,7 @@ namespace P7CreateRestApi.Service.Interfaces
         public Task<UpdateUserModel> GetUpdateUserModelById(int id);
         public Task<ServiceResult<UserDto>> UpdateUser(UpdateUserModel updateUserModel, int id);
         public Task<ServiceResult<UserDto>> ChangePassword(ChangePasswordModel changePasswordModel, int id);
-        public Task<bool> DeleteUser(int id);
+        public Task<List<ValidationResult>> DeleteUser(int id);
         public Task<string?> Login(LoginModel loginmodel);
     }
 }

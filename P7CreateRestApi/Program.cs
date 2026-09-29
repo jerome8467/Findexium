@@ -9,6 +9,7 @@ using P7CreateRestApi.Service.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using P7CreateRestApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -96,6 +97,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.UseMiddleware<LogEndpointMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

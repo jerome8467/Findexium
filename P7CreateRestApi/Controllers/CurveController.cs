@@ -4,6 +4,7 @@ using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -73,9 +74,9 @@ namespace P7CreateRestApi.Controllers
         [HttpDelete("Removal/{id}")]
         public async Task<IActionResult> DeleteCurvePoint(int id)
         {
-            bool success = await _curvePointService.DeleteCurvePoint(id);
-            if (!success)
-                return NotFound(new { message = CurvePointModelRessources.CurvePointNotFound });
+            List<ValidationResult> errors = await _curvePointService.DeleteCurvePoint(id);
+            if (errors.Any())
+                return NotFound(errors);
             return Ok();
         }
     }

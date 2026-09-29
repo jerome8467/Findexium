@@ -27,25 +27,15 @@ namespace P7CreateRestApi.Repositories
             _DbContext.BidLists.Add(bidlist);
             await _DbContext.SaveChangesAsync();
         }
-        public async Task<bool> UpdateBidList(BidList bidlist)
+        public async Task UpdateBidList(BidList bidlist)
         {
-            BidList? findBidList = await GetBidLIstById(bidlist.BidListId);
-            if (findBidList == null)
-                return false;
-
-            _DbContext.Entry(findBidList).CurrentValues.SetValues(bidlist);
+            _DbContext.Update(bidlist);
             await _DbContext.SaveChangesAsync();
-            return true;
         }
-        public async Task<bool> DeleteBidList(int id)
+        public async Task DeleteBidList(BidList bidlist)
         {
-            BidList? findBidList = await GetBidLIstById(id);
-            if (findBidList == null)
-                return false;
-
-            _DbContext.BidLists.Remove(findBidList);
+            _DbContext.BidLists.Remove(bidlist);
             await _DbContext.SaveChangesAsync();
-            return true;
         }
     }
 }

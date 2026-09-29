@@ -8,7 +8,9 @@ namespace P7CreateRestApi.Models
     {
         [Required(ErrorMessageResourceType = typeof(CurvePointModelRessources),
             ErrorMessageResourceName = "CurveIdRequired")]
-        public byte? CurveId { get; set; }
+        [Range(0, 255, ErrorMessageResourceType = typeof(CurvePointModelRessources),
+            ErrorMessageResourceName = "CurveIdRange")]
+        public int? CurveId { get; set; }
 
         public DateTime? AsOfDate { get; set; }
         public double? Term { get; set; }

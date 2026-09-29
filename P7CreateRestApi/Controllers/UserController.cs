@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Models.UserModel;
 using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -96,9 +97,9 @@ namespace P7CreateRestApi.Controllers
         [HttpDelete("Removal/{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            bool success = await _userService.DeleteUser(id);
-            if(!success)
-                return NotFound(new {message = UserModelRessources.UserNotFound});
+            List<ValidationResult> errors = await _userService.DeleteUser(id);
+            if (errors.Any())
+                return NotFound(errors);
             return Ok();
         }
 

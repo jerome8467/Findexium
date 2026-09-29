@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CurveIdRange" xml:space="preserve">
+    <value>L'identifiant de la courbe doit être compris entre 0 et 255.</value>
+  </data>
   <data name="CurveIdRequired" xml:space="preserve">
     <value>Un ID est obligatoire</value>
   </data>

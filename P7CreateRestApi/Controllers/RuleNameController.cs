@@ -5,6 +5,7 @@ using P7CreateRestApi.Models;
 using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service;
 using P7CreateRestApi.Service.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -61,7 +62,7 @@ namespace P7CreateRestApi.Controllers
 
         // PUT : Update RuleName with RuleNameModel
         [HttpPut("Modification/{id}")]
-        public async Task<IActionResult> UpdateRating(int id, [FromBody] RuleNameModel ruleNameModel)
+        public async Task<IActionResult> UpdateRuleName(int id, [FromBody] RuleNameModel ruleNameModel)
         {
             var result = await _ruleNameService.UpdateRuleName(ruleNameModel, id);
             if (result.Errors.Any())
@@ -71,11 +72,11 @@ namespace P7CreateRestApi.Controllers
 
         // DELETE : Delete RuleName by ID
         [HttpDelete("Removal/{id}")]
-        public async Task<IActionResult> DeleteRating(int id)
+        public async Task<IActionResult> DeleteRuleName(int id)
         {
-            bool success = await _ruleNameService.DeleteRuleName(id);
-            if (!success)
-                return NotFound(new { message = RuleNameModelRessources.RuleNameNotFound });
+            List<ValidationResult> errors = await _ruleNameService.DeleteRuleName(id);
+            if (errors.Any())
+                return NotFound(errors);
             return Ok();
         }
     }

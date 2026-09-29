@@ -18,5 +18,10 @@ namespace P7CreateRestApi.Ressource
             get { return resourceManager.GetString("CurvePointNotFound", cultureInfo) ?? string.Empty; }
         }
 
+        public static string CurveIdRange
+        {
+            get { return resourceManager.GetString("CurveIdRange", cultureInfo) ?? string.Empty; }
+        }
+
     }
 }

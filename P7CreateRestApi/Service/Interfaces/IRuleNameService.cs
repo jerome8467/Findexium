@@ -11,6 +11,6 @@ namespace P7CreateRestApi.Service.Interfaces
         public Task<RuleNameModel?> GetRuleNameModelById(int id);
         public Task<ServiceResult<RuleName>> AddRuleName(RuleNameModel ruleNameModel);
         public Task<ServiceResult<RuleName>> UpdateRuleName(RuleNameModel ruleNameModel, int id);
-        public Task<bool> DeleteRuleName(int id);
+        public Task<List<ValidationResult>> DeleteRuleName(int id);
     }
 }

@@ -123,6 +123,9 @@
   <data name="MoodysRatingRequired" xml:space="preserve">
     <value>La notation Moody's est requise.</value>
   </data>
+  <data name="OrderNumberRange" xml:space="preserve">
+    <value>Le nombre doit être compris entre 0 et 255.</value>
+  </data>
   <data name="RatingNotFound" xml:space="preserve">
     <value>La notation est introuvable.</value>
   </data>

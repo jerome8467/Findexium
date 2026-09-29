@@ -17,6 +17,8 @@ namespace P7CreateRestApi.Models
             ErrorMessageResourceName = "FitchRatingRequired")]
         public string FitchRating { get; set; }
 
-        public byte? OrderNumber { get; set; }
+        [Range(0, 255, ErrorMessageResourceType = typeof(RatingModelRessources),
+            ErrorMessageResourceName = "OrderNumberRange")]
+        public int? OrderNumber { get; set; }
     }
 }

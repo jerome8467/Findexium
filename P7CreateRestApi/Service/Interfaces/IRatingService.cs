@@ -11,6 +11,6 @@ namespace P7CreateRestApi.Service.Interfaces
         public Task<RatingModel?> GetRatingModelById(int id);
         public Task<ServiceResult<Rating>> AddRating(RatingModel ratingModel);
         public Task<ServiceResult<Rating>> UpdateRating(RatingModel ratingModel, int id);
-        public Task<bool> DeleteRating(int id);
+        public Task<List<ValidationResult>> DeleteRating(int id);
     }
 }

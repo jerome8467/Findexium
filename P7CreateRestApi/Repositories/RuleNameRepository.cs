@@ -31,26 +31,16 @@ namespace P7CreateRestApi.Repositories
             await _DbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> UpdateRuleName(RuleName ruleName)
+        public async Task UpdateRuleName(RuleName ruleName)
         {
-            RuleName? findRuleName = await GetRuleNameById(ruleName.Id);
-            if (findRuleName == null)
-                return false;
-
-            _DbContext.Entry(findRuleName).CurrentValues.SetValues(ruleName);
+            _DbContext.Update(ruleName);
             await _DbContext.SaveChangesAsync();
-            return true;
         }
 
-        public async Task<bool> DeleteRuleName(int id)
+        public async Task DeleteRuleName(RuleName ruleName)
         {
-            RuleName? findRuleName = await GetRuleNameById(id);
-            if (findRuleName == null)
-                return false;
-
-            _DbContext.RuleNames.Remove(findRuleName);
+            _DbContext.RuleNames.Remove(ruleName);
             await _DbContext.SaveChangesAsync();
-            return true;
         }
 
     }
