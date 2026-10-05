@@ -1,4 +1,4 @@
-﻿namespace P7CreateRestApi.Models.UserModel
+﻿namespace P7CreateRestApi.Dto
 {
     public class UserDto
     {

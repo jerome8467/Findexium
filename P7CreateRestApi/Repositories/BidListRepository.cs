@@ -18,7 +18,7 @@ namespace P7CreateRestApi.Repositories
             return await _DbContext.BidLists.ToListAsync();
         }
 
-        public async Task<BidList?> GetBidLIstById(int id)
+        public async Task<BidList?> GetBidListById(int id)
         {
             return await _DbContext.BidLists.FirstOrDefaultAsync(b => b.BidListId == id);
         }

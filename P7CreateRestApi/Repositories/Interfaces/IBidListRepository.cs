@@ -6,7 +6,7 @@ namespace P7CreateRestApi.Repositories.Interfaces
     {
 
         public Task<IEnumerable<BidList>> GetAllBidList();
-        public Task<BidList?> GetBidLIstById(int id);
+        public Task<BidList?> GetBidListById(int id);
         public Task AddBidList(BidList bidlist);
         public Task UpdateBidList(BidList bidlist);
         public Task DeleteBidList(BidList bidlist);

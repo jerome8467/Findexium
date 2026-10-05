@@ -55,22 +55,22 @@ namespace Test_P7CreateRestApi.Unitaire.CurvePointTest
         public async Task Service_GetAllCurvePoint()
         {
             // ACT
-            IEnumerable<CurvePoint> curvePoints = await _curvePointService.GetAllCurvePoint();
+            IEnumerable<CurvePointDto> curvePointDtos = await _curvePointService.GetAllCurvePoint();
 
             // ASSERT
-            Assert.Equal(4, curvePoints.Count());
+            Assert.Equal(4, curvePointDtos.Count());
         }
 
         [Fact]
         public async Task Service_GetCurvePointById()
         {
             // ACT
-            CurvePoint? curvePoint = await _curvePointService.GetCurvePointById(1);
+            CurvePointDto? curvePointDto = await _curvePointService.GetCurvePointById(1);
 
             // ASSERT
-            Assert.NotNull(curvePoint);
-            Assert.Equal(1, curvePoint?.Id);
-            Assert.Equal((byte)10, curvePoint?.CurveId);
+            Assert.NotNull(curvePointDto);
+            Assert.Equal(1, curvePointDto?.Id);
+            Assert.Equal((byte)10, curvePointDto?.CurveId);
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace Test_P7CreateRestApi.Unitaire.CurvePointTest
             };
 
             // ACT
-            ServiceResult<CurvePoint> serviceResult = await _curvePointService.UpdateCurvePoint(curvePointModel, 1);
+            ServiceResult<CurvePointDto> serviceResult = await _curvePointService.UpdateCurvePoint(curvePointModel, 1);
             CurvePoint curvePoint = await _dbContext.curvePoints
                 .AsNoTracking()
                 .FirstAsync(i => i.Id == 1);
@@ -116,7 +116,7 @@ namespace Test_P7CreateRestApi.Unitaire.CurvePointTest
             };
 
             // ACT
-            ServiceResult<CurvePoint> serviceResult = await _curvePointService.AddCurvePoint(curvePointModel);
+            ServiceResult<CurvePointDto> serviceResult = await _curvePointService.AddCurvePoint(curvePointModel);
             CurvePoint? curvePoint = await _dbContext.curvePoints
                 .AsNoTracking()
                 .OrderBy(i => i.Id).LastAsync();

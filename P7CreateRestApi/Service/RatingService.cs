@@ -17,14 +17,23 @@ namespace P7CreateRestApi.Service
             _ratingRepository = ratingRepository;
         }
 
-        public async Task<IEnumerable<Rating>> GetAllRating()
+        public async Task<IEnumerable<RatingDto>> GetAllRating()
         {
-            return await _ratingRepository.GetAllRating();
+            IEnumerable<Rating> ratings = await _ratingRepository.GetAllRating();
+            List<RatingDto> ratingDtos = new List<RatingDto>();
+            foreach (var dto in ratings)
+            {
+                ratingDtos.Add(MappingRatingForDto(dto));
+            }
+            return ratingDtos.ToList();
         }
 
-        public async Task<Rating?> GetRatingById(int id)
+        public async Task<RatingDto?> GetRatingById(int id)
         {
-            return await _ratingRepository.GetRatingById(id);
+            Rating? rating = await _ratingRepository.GetRatingById(id);
+            if (rating == null)
+                return null;
+            return MappingRatingForDto(rating);
         }
 
         public async Task<RatingModel?> GetRatingModelById(int id)
@@ -35,9 +44,9 @@ namespace P7CreateRestApi.Service
             return MappingRatingForModel(rating);
         }
 
-        public async Task<ServiceResult<Rating>> AddRating(RatingModel ratingModel)
+        public async Task<ServiceResult<RatingDto>> AddRating(RatingModel ratingModel)
         {
-            var result =  new ServiceResult<Rating>();
+            var result =  new ServiceResult<RatingDto>();
             ValidationContext context = new ValidationContext(ratingModel);
             if (!Validator.TryValidateObject(ratingModel, context, result.Errors, true))
                 return result;
@@ -46,13 +55,13 @@ namespace P7CreateRestApi.Service
 
             await _ratingRepository.AddRating(rating);
 
-            result.Data = rating;
+            result.Data = MappingRatingForDto(rating);
             return result;
         }
 
-        public async Task<ServiceResult<Rating>> UpdateRating(RatingModel ratingModel, int id)
+        public async Task<ServiceResult<RatingDto>> UpdateRating(RatingModel ratingModel, int id)
         {
-            var result = new ServiceResult<Rating>();
+            var result = new ServiceResult<RatingDto>();
             ValidationContext context = new ValidationContext(ratingModel);
             if (!Validator.TryValidateObject(ratingModel, context, result.Errors, true))
                 return result;
@@ -68,7 +77,7 @@ namespace P7CreateRestApi.Service
 
             await _ratingRepository.UpdateRating(findRating);
 
-            result.Data = findRating;
+            result.Data = MappingRatingForDto(findRating);
             return result;
         }
 
@@ -105,10 +114,21 @@ namespace P7CreateRestApi.Service
                 FitchRating = rating.FitchRating,
                 OrderNumber = rating.OrderNumber
             };
-
             return ratingModel;
         }
 
+        private RatingDto MappingRatingForDto(Rating rating)
+        {
+            RatingDto ratingDto = new RatingDto
+            {
+                Id = rating.Id,
+                MoodysRating = rating.MoodysRating,
+                SandPRating = rating.SandPRating,
+                FitchRating = rating.FitchRating,
+                OrderNumber = rating.OrderNumber
+            };
+            return ratingDto;
+        }
 
     }
 }

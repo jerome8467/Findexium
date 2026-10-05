@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using P7CreateRestApi.Domain;
+using P7CreateRestApi.Dto;
 using P7CreateRestApi.Models.UserModel;
 using P7CreateRestApi.Repositories.Interfaces;
 using P7CreateRestApi.Ressource;

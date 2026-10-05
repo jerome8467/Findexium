@@ -16,14 +16,23 @@ namespace P7CreateRestApi.Service
             _tradeRepository = tradingRepository;
         }
 
-        public async Task<IEnumerable<Trade>> GetAllTrade()
+        public async Task<IEnumerable<TradeDto>> GetAllTrade()
         {
-            return await _tradeRepository.GetAllTrade();
+            IEnumerable<Trade> trades = await _tradeRepository.GetAllTrade();
+            List<TradeDto> tradeDtos = new List<TradeDto>();
+            foreach (var dto in trades)
+            {
+                tradeDtos.Add(MappingTradeForDto(dto));
+            }
+            return tradeDtos.ToList();
         }
 
-        public async Task<Trade?> GetTradeById(int id)
+        public async Task<TradeDto?> GetTradeById(int id)
         {
-            return await _tradeRepository.GetTradeById(id);
+            Trade? trade = await _tradeRepository.GetTradeById(id);
+            if (trade == null)
+                return null;
+            return MappingTradeForDto(trade);
         }
 
         public async Task<TradeModel?> GetTradeModelById(int id)
@@ -34,10 +43,10 @@ namespace P7CreateRestApi.Service
             return MappingTradeForModel(trade);
         }
 
-        public async Task<ServiceResult<Trade>> AddTrade(TradeModel tradeModel, string userName)
+        public async Task<ServiceResult<TradeDto>> AddTrade(TradeModel tradeModel, string userName)
         {
             ValidationContext context = new ValidationContext(tradeModel);
-            var result = new ServiceResult<Trade>();
+            var result = new ServiceResult<TradeDto>();
             if(!Validator.TryValidateObject(tradeModel, context, result.Errors, true))
                 return result;
 
@@ -49,15 +58,15 @@ namespace P7CreateRestApi.Service
 
             await _tradeRepository.AddTrade(trade);
 
-            result.Data = trade;
+            result.Data = MappingTradeForDto(trade);
             return result;
 
         }
 
-        public async Task<ServiceResult<Trade>> UpdateTrade(TradeModel tradeModel, string userName, int id)
+        public async Task<ServiceResult<TradeDto>> UpdateTrade(TradeModel tradeModel, string userName, int id)
         {
             ValidationContext context = new ValidationContext(tradeModel);
-            var result = new ServiceResult<Trade>();
+            var result = new ServiceResult<TradeDto>();
             if (!Validator.TryValidateObject(tradeModel, context, result.Errors, true))
                 return result;
 
@@ -74,7 +83,7 @@ namespace P7CreateRestApi.Service
 
             await _tradeRepository.UpdateTrade(findTrade);
                 
-            result.Data = findTrade;
+            result.Data = MappingTradeForDto(findTrade);
             return result;
         }
 
@@ -138,6 +147,35 @@ namespace P7CreateRestApi.Service
             };
 
             return tradeModel;
+        }
+
+        private TradeDto MappingTradeForDto(Trade trade)
+        {
+            TradeDto tradeDto = new TradeDto
+            {
+                TradeId = trade.TradeId,
+                Account = trade.Account,
+                AccountType = trade.AccountType,
+                BuyQuantity = trade.BuyQuantity,
+                SellQuantity = trade.SellQuantity,
+                BuyPrice = trade.BuyPrice,
+                SellPrice = trade.SellPrice,
+                TradeDate = trade.TradeDate,
+                TradeSecurity = trade.TradeSecurity,
+                TradeStatus = trade.TradeStatus,
+                Trader = trade.Trader,
+                Benchmark = trade.Benchmark,
+                Book = trade.Book,
+                CreationDate = trade.CreationDate,
+                CreationName = trade.CreationName,
+                RevisionDate = trade.RevisionDate,
+                RevisionName = trade.RevisionName,
+                DealName = trade.DealName,
+                DealType = trade.DealType,
+                SourceListId = trade.SourceListId,
+                Side = trade.Side,
+            };
+            return tradeDto;
         }
 
     }

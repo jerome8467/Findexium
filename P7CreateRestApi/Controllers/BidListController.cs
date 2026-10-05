@@ -25,7 +25,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("List")]
         public async Task<IActionResult> GetAllBidList()
         {
-            IEnumerable<BidList> bidLists = await _BidListService.GetAllBidList();
+            IEnumerable<BidListDto> bidLists = await _BidListService.GetAllBidList();
             return Ok(bidLists);
         }
 
@@ -33,7 +33,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetBidListById(int id)
         {
-            BidList? bidlist = await _BidListService.GetBidListById(id);
+            BidListDto? bidlist = await _BidListService.GetBidListById(id);
             if (bidlist == null)
                 return NotFound(new { message = BidListModelRessources.BidListNotFound });
 

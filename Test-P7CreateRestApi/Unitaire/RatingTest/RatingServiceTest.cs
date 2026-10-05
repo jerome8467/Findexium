@@ -57,7 +57,7 @@ namespace Test_P7CreateRestApi.Unitaire.RatingTest
         public async Task Service_GetAllRating()
         {
             // ACT
-            IEnumerable<Rating> ratings = await _ratingService.GetAllRating();
+            IEnumerable<RatingDto> ratings = await _ratingService.GetAllRating();
 
             // ASSERT
             Assert.Equal(4, ratings.Count());
@@ -67,12 +67,12 @@ namespace Test_P7CreateRestApi.Unitaire.RatingTest
         public async Task Service_GetRatingById()
         {
             // ACT
-            Rating? rating = await _ratingService.GetRatingById(1);
+            RatingDto? ratingDto = await _ratingService.GetRatingById(1);
 
             // ASSERT
-            Assert.NotNull(rating);
-            Assert.Equal(1, rating?.Id);
-            Assert.Equal((byte)10, rating?.OrderNumber);
+            Assert.NotNull(ratingDto);
+            Assert.Equal(1, ratingDto?.Id);
+            Assert.Equal((byte)10, ratingDto?.OrderNumber);
         }
 
         [Fact]
@@ -99,7 +99,7 @@ namespace Test_P7CreateRestApi.Unitaire.RatingTest
             };
 
             // ACT
-            ServiceResult<Rating> serviceResult = await _ratingService.UpdateRating(ratingModel, 1);
+            ServiceResult<RatingDto> serviceResult = await _ratingService.UpdateRating(ratingModel, 1);
             Rating rating = await _dbContext.ratings
                 .AsNoTracking()
                 .FirstAsync(i => i.Id == 1);
@@ -127,7 +127,7 @@ namespace Test_P7CreateRestApi.Unitaire.RatingTest
             };
 
             // ACT
-            ServiceResult<Rating> serviceResult = await _ratingService.AddRating(ratingModel);
+            ServiceResult<RatingDto> serviceResult = await _ratingService.AddRating(ratingModel);
             Rating? rating = await _dbContext.ratings
                 .AsNoTracking()
                 .OrderBy(i => i.Id).LastAsync();

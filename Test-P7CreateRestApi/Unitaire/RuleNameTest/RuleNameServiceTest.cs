@@ -60,7 +60,7 @@ namespace Test_P7CreateRestApi.Unitaire.RuleNameTest
         public async Task Service_GetAllRuleName()
         {
             // ACT
-            IEnumerable<RuleName> ruleNames = await _ruleNameService.GetAllRuleName();
+            IEnumerable<RuleNameDto> ruleNames = await _ruleNameService.GetAllRuleName();
 
             // ASSERT
             Assert.Equal(4, ruleNames.Count());
@@ -70,7 +70,7 @@ namespace Test_P7CreateRestApi.Unitaire.RuleNameTest
         public async Task Service_GetRuleNameById()
         {
             // ACT
-            RuleName? ruleName = await _ruleNameService.GetRuleNameById(1);
+            RuleNameDto? ruleName = await _ruleNameService.GetRuleNameById(1);
 
             // ASSERT
             Assert.NotNull(ruleName);
@@ -114,7 +114,7 @@ namespace Test_P7CreateRestApi.Unitaire.RuleNameTest
             };
 
             // ARRANGE
-            ServiceResult<RuleName> serviceResult = await _ruleNameService.UpdateRuleName(ruleNameModel, 1);
+            ServiceResult<RuleNameDto> serviceResult = await _ruleNameService.UpdateRuleName(ruleNameModel, 1);
             RuleName? ruleName = await _dbContext.RuleNames
                 .AsNoTracking()
                 .FirstAsync(i => i.Id == 1);
@@ -145,7 +145,7 @@ namespace Test_P7CreateRestApi.Unitaire.RuleNameTest
             };
 
             // ARRANGE
-            ServiceResult<RuleName> serviceResult = await _ruleNameService.AddRuleName(ruleNameModel);
+            ServiceResult<RuleNameDto> serviceResult = await _ruleNameService.AddRuleName(ruleNameModel);
             RuleName? ruleName = await _dbContext.RuleNames
                 .AsNoTracking()
                 .OrderBy(i => i.Id).LastAsync();

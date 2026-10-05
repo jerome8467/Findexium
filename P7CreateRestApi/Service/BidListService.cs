@@ -17,27 +17,37 @@ namespace P7CreateRestApi.Service
             _bidListRepository = bidListRepository;
         }
 
-        public async Task<IEnumerable<BidList>> GetAllBidList()
+        public async Task<IEnumerable<BidListDto>> GetAllBidList()
         {
-            return await _bidListRepository.GetAllBidList();
+            IEnumerable<BidList> bidList = await _bidListRepository.GetAllBidList();
+            List<BidListDto> BidListDtos = new List<BidListDto>();
+            foreach (var dto in bidList)
+            {
+                BidListDtos.Add(MappingBidListForDto(dto));
+            }
+
+            return BidListDtos.ToList();
         }
 
-        public async Task<BidList?> GetBidListById(int id)
+        public async Task<BidListDto?> GetBidListById(int id)
         {
-            return await _bidListRepository.GetBidLIstById(id);
+            BidList? bidList = await _bidListRepository.GetBidListById(id);
+            if(bidList == null)
+                return null;
+            return MappingBidListForDto(bidList);
         }
 
         public async Task<BidListModel?> GetBidListModelById(int id)
         {
-            BidList? bidList = await _bidListRepository.GetBidLIstById(id);
+            BidList? bidList = await _bidListRepository.GetBidListById(id);
             if(bidList == null)
                 return null;
             return MappingBidListForModel(bidList);
         }
 
-        public async Task<ServiceResult<BidList>> AddBidList(BidListModel bidlistModel, string userName)
+        public async Task<ServiceResult<BidListDto>> AddBidList(BidListModel bidlistModel, string userName)
         {
-            var result = new ServiceResult<BidList>();
+            var result = new ServiceResult<BidListDto>();
             ValidationContext context = new ValidationContext(bidlistModel);
             if (!Validator.TryValidateObject(bidlistModel, context, result.Errors, true))
                 return result;
@@ -51,19 +61,19 @@ namespace P7CreateRestApi.Service
 
             await _bidListRepository.AddBidList(bidList);
 
-            result.Data = bidList;
+            result.Data = MappingBidListForDto(bidList);
             return result;
         }
 
-        public async Task<ServiceResult<BidList>> UpdateBidList(BidListModel bidlistModel, string userName, int id)
+        public async Task<ServiceResult<BidListDto>> UpdateBidList(BidListModel bidlistModel, string userName, int id)
         {
-            var result = new ServiceResult<BidList>();
+            var result = new ServiceResult<BidListDto>();
             ValidationContext context = new ValidationContext(bidlistModel);
 
             if (!Validator.TryValidateObject(bidlistModel, context, result.Errors, true))
                 return result;
 
-            BidList? findBidList = await _bidListRepository.GetBidLIstById(id);
+            BidList? findBidList = await _bidListRepository.GetBidListById(id);
             if (findBidList == null)
             {
                 result.Errors.Add(new ValidationResult(BidListModelRessources.BidListNotFound));
@@ -76,7 +86,7 @@ namespace P7CreateRestApi.Service
 
             await _bidListRepository.UpdateBidList(findBidList);
 
-            result.Data = findBidList;
+            result.Data = MappingBidListForDto(findBidList);
             return result;
         }
 
@@ -84,7 +94,7 @@ namespace P7CreateRestApi.Service
         {
             List<ValidationResult> result = new List<ValidationResult>();
 
-            BidList? findBidList = await _bidListRepository.GetBidLIstById(id);
+            BidList? findBidList = await _bidListRepository.GetBidListById(id);
             if (findBidList == null)
             {
                 result.Add(new ValidationResult(BidListModelRessources.BidListNotFound));
@@ -142,6 +152,36 @@ namespace P7CreateRestApi.Service
             };
 
             return bidListModel;
+        }
+
+        private BidListDto MappingBidListForDto(BidList bidlist)
+        {
+            BidListDto bidListDto = new BidListDto
+            {
+                BidListId = bidlist.BidListId,
+                Account = bidlist.Account,
+                BidType = bidlist.BidType,
+                BidQuantity = bidlist.BidQuantity,
+                AskQuantity = bidlist.AskQuantity,
+                Bid = bidlist.Bid,
+                Ask = bidlist.Ask,
+                Benchmark = bidlist.Benchmark,
+                BidListDate = bidlist.BidListDate,
+                Commentary = bidlist.Commentary,
+                BidSecurity = bidlist.BidSecurity,
+                BidStatus = bidlist.BidStatus,
+                Trader = bidlist.Trader,
+                Book = bidlist.Book,
+                CreationName = bidlist.CreationName,
+                CreationDate = bidlist.CreationDate,
+                RevisionName = bidlist.RevisionName,
+                RevisionDate = bidlist.RevisionDate,
+                DealName = bidlist.DealName,
+                DealType = bidlist.DealType,
+                SourceListId = bidlist.SourceListId,
+                Side = bidlist.Side
+            };
+            return bidListDto;
         }
 
 

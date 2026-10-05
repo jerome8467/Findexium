@@ -25,7 +25,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("List")]
         public async Task<IActionResult> GetAllRuleName()
         {
-            IEnumerable<RuleName> ruleNames = await _ruleNameService.GetAllRuleName();
+            IEnumerable<RuleNameDto> ruleNames = await _ruleNameService.GetAllRuleName();
             return Ok(ruleNames);
         }
 
@@ -33,7 +33,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetRuleNameById(int id)
         {
-            RuleName? ruleName = await _ruleNameService.GetRuleNameById(id);
+            RuleNameDto? ruleName = await _ruleNameService.GetRuleNameById(id);
             if (ruleName == null)
                 return NotFound(new { message = RuleNameModelRessources.RuleNameNotFound });
 

@@ -17,14 +17,24 @@ namespace P7CreateRestApi.Service
             _curvePointRepository = curvePointRepository;
         }
 
-        public async Task<IEnumerable<CurvePoint>> GetAllCurvePoint()
+        public async Task<IEnumerable<CurvePointDto>> GetAllCurvePoint()
         {
-            return await _curvePointRepository.GetAllCurvePoint();
+            IEnumerable<CurvePoint> curvePoints = await _curvePointRepository.GetAllCurvePoint();
+            List<CurvePointDto> curvePointDtos = new List<CurvePointDto>();
+            foreach (var dto in curvePoints)
+            {
+                curvePointDtos.Add(MappingCurvePointForDto(dto));
+            }
+
+            return curvePointDtos.ToList();
         }
 
-        public async Task<CurvePoint?> GetCurvePointById(int id)
+        public async Task<CurvePointDto?> GetCurvePointById(int id)
         {
-            return await _curvePointRepository.GetCurvePointById(id);
+            CurvePoint? curvePoint = await _curvePointRepository.GetCurvePointById(id);
+            if (curvePoint == null)
+                return null;
+            return MappingCurvePointForDto(curvePoint);
         }
 
         public async Task<CurvePointModel?> GetCurvePointModelById(int id)
@@ -35,9 +45,9 @@ namespace P7CreateRestApi.Service
             return MappingCurvePointForModel(curvePoint);
         }
 
-        public async Task<ServiceResult<CurvePoint>> AddCurvePoint(CurvePointModel curvePointModel)
+        public async Task<ServiceResult<CurvePointDto>> AddCurvePoint(CurvePointModel curvePointModel)
         {
-            var result = new ServiceResult<CurvePoint>();
+            var result = new ServiceResult<CurvePointDto>();
             ValidationContext context = new ValidationContext(curvePointModel);
             if (!Validator.TryValidateObject(curvePointModel, context, result.Errors, true))
                 return result;
@@ -47,13 +57,13 @@ namespace P7CreateRestApi.Service
 
             await _curvePointRepository.AddCurvePoint(curvePoint);
 
-            result.Data = curvePoint; 
+            result.Data = MappingCurvePointForDto(curvePoint); 
             return result;
         }
 
-        public async Task<ServiceResult<CurvePoint>> UpdateCurvePoint(CurvePointModel curvePointModel, int id)
+        public async Task<ServiceResult<CurvePointDto>> UpdateCurvePoint(CurvePointModel curvePointModel, int id)
         {
-            var result = new ServiceResult<CurvePoint>();
+            var result = new ServiceResult<CurvePointDto>();
             ValidationContext context = new ValidationContext(curvePointModel);
             if (!Validator.TryValidateObject(curvePointModel, context, result.Errors, true))
                 return result;
@@ -69,7 +79,7 @@ namespace P7CreateRestApi.Service
 
             await _curvePointRepository.UpdateCurvePoint(findCurvePoint);
 
-            result.Data = findCurvePoint;
+            result.Data = MappingCurvePointForDto(findCurvePoint);
             return result;
         }
 
@@ -110,6 +120,20 @@ namespace P7CreateRestApi.Service
             };
 
             return curvePointModel;
+        }
+
+        private CurvePointDto MappingCurvePointForDto(CurvePoint curvePoint)
+        {
+            CurvePointDto curvePointDto = new CurvePointDto
+            {
+                Id = curvePoint.Id,
+                CurveId = curvePoint.CurveId,
+                AsOfDate = curvePoint.AsOfDate,
+                Term = curvePoint.Term,
+                CurvePointValue = curvePoint.CurvePointValue,
+                CreationDate = curvePoint.CreationDate,
+            };
+            return curvePointDto;
         }
 
     }

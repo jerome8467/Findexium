@@ -17,14 +17,23 @@ namespace P7CreateRestApi.Service
             _ruleNameRepository = ruleNameRepository;
         }
 
-        public async Task<IEnumerable<RuleName>> GetAllRuleName()
+        public async Task<IEnumerable<RuleNameDto>> GetAllRuleName()
         {
-            return await _ruleNameRepository.GetAllRuleName();
+            IEnumerable<RuleName> ruleNames = await _ruleNameRepository.GetAllRuleName();
+            List<RuleNameDto> ruleNameDtos = new List<RuleNameDto>();
+            foreach(var dto in ruleNames)
+            {
+                ruleNameDtos.Add(MappingRuleNameForDto(dto));
+            }
+            return ruleNameDtos;
         }
 
-        public async Task<RuleName?> GetRuleNameById(int id)
+        public async Task<RuleNameDto?> GetRuleNameById(int id)
         {
-            return await _ruleNameRepository.GetRuleNameById(id);
+            RuleName? ruleName = await _ruleNameRepository.GetRuleNameById(id);
+            if (ruleName == null)
+                return null;
+            return MappingRuleNameForDto(ruleName);
         }
 
         public async Task<RuleNameModel?> GetRuleNameModelById(int id)
@@ -35,9 +44,9 @@ namespace P7CreateRestApi.Service
             return MappingRuleNameForModel(ruleName);
         }
 
-        public async Task<ServiceResult<RuleName>> AddRuleName(RuleNameModel ruleNameModel)
+        public async Task<ServiceResult<RuleNameDto>> AddRuleName(RuleNameModel ruleNameModel)
         {
-            var result = new ServiceResult<RuleName>();
+            var result = new ServiceResult<RuleNameDto>();
             ValidationContext context = new ValidationContext(ruleNameModel);
             
             if(!Validator.TryValidateObject(ruleNameModel, context, result.Errors, true))
@@ -45,14 +54,14 @@ namespace P7CreateRestApi.Service
 
             RuleName ruleName = MappingRuleNameModelForDatabase(ruleNameModel, new RuleName());
             await _ruleNameRepository.AddRuleName(ruleName);
-            result.Data = ruleName;
+            result.Data = MappingRuleNameForDto(ruleName);
             return result;
         }
 
-        public async Task<ServiceResult<RuleName>> UpdateRuleName(RuleNameModel ruleNameModel, int id)
+        public async Task<ServiceResult<RuleNameDto>> UpdateRuleName(RuleNameModel ruleNameModel, int id)
         {
             ValidationContext context = new ValidationContext(ruleNameModel);
-            var result = new ServiceResult<RuleName>();
+            var result = new ServiceResult<RuleNameDto>();
 
             if (!Validator.TryValidateObject(ruleNameModel, context, result.Errors, true))
                 return result;
@@ -68,7 +77,7 @@ namespace P7CreateRestApi.Service
 
             await _ruleNameRepository.UpdateRuleName(findRuleName);
 
-            result.Data = findRuleName;
+            result.Data = MappingRuleNameForDto(findRuleName);
             return result;
         }
 
@@ -113,6 +122,20 @@ namespace P7CreateRestApi.Service
             return ruleNameModel;
         }
 
+        private RuleNameDto MappingRuleNameForDto(RuleName ruleName)
+        {
+            RuleNameDto ruleNameDto = new RuleNameDto
+            {
+                Id = ruleName.Id,
+                Name = ruleName.Name,
+                Description = ruleName.Description,
+                Json = ruleName.Json,
+                Template = ruleName.Template,
+                SqlStr = ruleName.SqlStr,
+                SqlPart = ruleName.SqlPart,
+            };
+            return ruleNameDto;
+        }
 
     }
 }

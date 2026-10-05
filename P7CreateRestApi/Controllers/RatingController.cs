@@ -26,7 +26,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("List")]
         public async Task<IActionResult> GetAllRating()
         {
-            IEnumerable<Rating> rating = await _ratingService.GetAllRating();
+            IEnumerable<RatingDto> rating = await _ratingService.GetAllRating();
             return Ok(rating);
         }
 
@@ -34,7 +34,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetRatingById(int id)
         {
-            Rating? rating = await _ratingService.GetRatingById(id);
+            RatingDto? rating = await _ratingService.GetRatingById(id);
             if (rating == null)
                 return NotFound(new { message = RatingModelRessources.RatingNotFound });
 

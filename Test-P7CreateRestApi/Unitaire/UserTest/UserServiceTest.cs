@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using P7CreateRestApi.Data;
 using P7CreateRestApi.Domain;
+using P7CreateRestApi.Dto;
 using P7CreateRestApi.Models.UserModel;
 using P7CreateRestApi.Repositories;
 using P7CreateRestApi.Repositories.Interfaces;

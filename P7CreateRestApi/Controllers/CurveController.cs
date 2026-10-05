@@ -25,7 +25,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("List")]
         public async Task<IActionResult> GetAllCurvePoint()
         {
-            IEnumerable<CurvePoint> curvePoint = await _curvePointService.GetAllCurvePoint();
+            IEnumerable<CurvePointDto> curvePoint = await _curvePointService.GetAllCurvePoint();
             return Ok(curvePoint);
         }
 
@@ -33,7 +33,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetCurvePointById(int id)
         {
-            CurvePoint? curvePoint = await _curvePointService.GetCurvePointById(id);
+            CurvePointDto? curvePoint = await _curvePointService.GetCurvePointById(id);
             if (curvePoint == null)
                 return NotFound(new { message = CurvePointModelRessources.CurvePointNotFound });
 

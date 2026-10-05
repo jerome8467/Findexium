@@ -71,7 +71,7 @@ namespace Test_P7CreateRestApi.Unitaire.TradeTest
         public async Task Service_GetAllTrade()
         {
             // ACT
-            IEnumerable<Trade> trades = await _tradeService.GetAllTrade();
+            IEnumerable<TradeDto> trades = await _tradeService.GetAllTrade();
 
             // ASSERT
             Assert.Equal(4, trades.Count());
@@ -81,7 +81,7 @@ namespace Test_P7CreateRestApi.Unitaire.TradeTest
         public async Task Service_GetTradeById()
         {
             // ACT
-            Trade? trade = await _tradeService.GetTradeById(1);
+            TradeDto? trade = await _tradeService.GetTradeById(1);
 
             // ASSERT
             Assert.NotNull(trade);
@@ -120,7 +120,7 @@ namespace Test_P7CreateRestApi.Unitaire.TradeTest
             };
 
             // ACT
-            ServiceResult<Trade> serviceResult = await _tradeService.UpdateTrade(tradeModel, "JeromeForUpdate", 1);
+            ServiceResult<TradeDto> serviceResult = await _tradeService.UpdateTrade(tradeModel, "JeromeForUpdate", 1);
             Trade? trade = await _dbContext.Trades
                 .AsNoTracking()
                 .FirstAsync(i => i.TradeId == 1);
@@ -155,7 +155,7 @@ namespace Test_P7CreateRestApi.Unitaire.TradeTest
             };
 
             // ACT
-            ServiceResult<Trade> serviceResult = await _tradeService.AddTrade(tradeModel, "JeromeForNew");
+            ServiceResult<TradeDto> serviceResult = await _tradeService.AddTrade(tradeModel, "JeromeForNew");
             Trade? trade = await _dbContext.Trades
                 .AsNoTracking()
                 .OrderBy(i => i.TradeId).LastAsync();

@@ -25,7 +25,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("list")]
         public async Task<IActionResult> GetAllTrade()
         {
-            IEnumerable<Trade> trades = await _tradeService.GetAllTrade();
+            IEnumerable<TradeDto> trades = await _tradeService.GetAllTrade();
             return Ok(trades);
         }
 
@@ -33,7 +33,7 @@ namespace P7CreateRestApi.Controllers
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetTradById(int id)
         {
-            Trade? trade = await _tradeService.GetTradeById(id);
+            TradeDto? trade = await _tradeService.GetTradeById(id);
             if(trade == null)
             {
                 return NotFound(new { message = TradeModelRessources.TradeNotFound });

@@ -74,22 +74,22 @@ namespace Test_P7CreateRestApi.Unitaire.BidListTest
         public async Task Service_GetAllBidList()
         {
             // ACT
-            IEnumerable<BidList> bidLists = await _bidListService.GetAllBidList();
+            IEnumerable<BidListDto> bidListDtos = await _bidListService.GetAllBidList();
 
             //ASSERT
-            Assert.Equal(4, bidLists.Count());
+            Assert.Equal(4, bidListDtos.Count());
         }
 
         [Fact]
         public async Task Service_GetBidListById()
         {
             // ACT
-            BidList? bidList = await _bidListService.GetBidListById(2);
+            BidListDto? bidListDto = await _bidListService.GetBidListById(2);
 
             //ASSERT
-            Assert.NotNull(bidList);
-            Assert.Equal(2, bidList?.BidListId);
-            Assert.Equal("Account2", bidList?.Account);
+            Assert.NotNull(bidListDto);
+            Assert.Equal(2, bidListDto?.BidListId);
+            Assert.Equal("Account2", bidListDto?.Account);
         }
 
         [Fact]
@@ -125,7 +125,7 @@ namespace Test_P7CreateRestApi.Unitaire.BidListTest
             string usernameIdentity = "JeromeAdmin";
 
             // ACT
-            ServiceResult<BidList> serviceResult = await _bidListService.UpdateBidList(bidListModel, usernameIdentity, 1);
+            ServiceResult<BidListDto> serviceResult = await _bidListService.UpdateBidList(bidListModel, usernameIdentity, 1);
             BidList? bidList = await _dbContext.BidLists
                 .AsNoTracking()
                 .FirstAsync(i => i.BidListId == 1);
@@ -162,7 +162,7 @@ namespace Test_P7CreateRestApi.Unitaire.BidListTest
             string usernameIdentity = "JeromeAdmin";
 
             // ACT
-            ServiceResult<BidList> serviceResult = await _bidListService.AddBidList(bidListModel, usernameIdentity);
+            ServiceResult<BidListDto> serviceResult = await _bidListService.AddBidList(bidListModel, usernameIdentity);
 
             BidList? bidList = await _dbContext.BidLists
                 .AsNoTracking()

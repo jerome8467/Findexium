@@ -1,4 +1,5 @@
-﻿using P7CreateRestApi.Models.UserModel;
+﻿using P7CreateRestApi.Dto;
+using P7CreateRestApi.Models.UserModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.Service.Interfaces

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Dto;
 using P7CreateRestApi.Models.UserModel;
 using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service.Interfaces;
@@ -52,6 +53,7 @@ namespace P7CreateRestApi.Controllers
 
         // POST : New User
         [HttpPost("Creation")]
+        [AllowAnonymous]
         public async Task<IActionResult> AddNewUser(SignUpModel signUpModel)
         {
             var result = await _userService.AddUser(signUpModel);
