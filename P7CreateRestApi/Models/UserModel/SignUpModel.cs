@@ -8,7 +8,7 @@ namespace P7CreateRestApi.Models.UserModel
     {
         [Required(ErrorMessageResourceType = typeof(UserModelRessources),
             ErrorMessageResourceName = "UsernameRequired")]
-        public string Username { get; set; }
+        public string Username { get; set; } 
 
         [PasswordValid]
         public string Password { get; set; }

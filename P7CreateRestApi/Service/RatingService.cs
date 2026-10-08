@@ -95,6 +95,8 @@ namespace P7CreateRestApi.Service
             return result;
         }
 
+        ///////////////////// PRIVATE FUNCTION /////////////////////
+
         private Rating MappingRatingModelForDatabase(RatingModel ratingModel, Rating rating)
         {
             rating.MoodysRating = ratingModel.MoodysRating;

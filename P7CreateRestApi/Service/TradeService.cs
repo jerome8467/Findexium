@@ -102,6 +102,8 @@ namespace P7CreateRestApi.Service
             return result;
         }
 
+        ///////////////////// PRIVATE FUNCTION /////////////////////
+
         private Trade MappingTradeModelForDatabase(TradeModel tradeModel, Trade trade)
         {
             trade.Account = tradeModel.Account;

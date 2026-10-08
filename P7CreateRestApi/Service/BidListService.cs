@@ -105,6 +105,8 @@ namespace P7CreateRestApi.Service
             return result;
         }
 
+        ///////////////////// PRIVATE FUNCTION /////////////////////
+
         private BidList MappingBidListModelForDatabase(BidListModel bidlistModel, BidList bidList)
         {
             bidList.Account = bidlistModel.Account;

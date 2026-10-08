@@ -186,6 +186,8 @@ namespace P7CreateRestApi.Service
             return _tokenService.GenerateToken(user);
         }
 
+        ///////////////////// PRIVATE FUNCTION /////////////////////
+
         private UserDto MappingUserToDto(User user)
         {
             UserDto userDto = new UserDto

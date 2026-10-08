@@ -98,6 +98,8 @@ namespace P7CreateRestApi.Service
             return result;
         }
 
+        ///////////////////// PRIVATE FUNCTION /////////////////////
+
         private CurvePoint MappingCurvePointModelForDatabase(CurvePointModel curvePointModel, CurvePoint curvePoint)
         {
 

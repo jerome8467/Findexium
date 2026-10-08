@@ -95,6 +95,8 @@ namespace P7CreateRestApi.Service
             return result;
         }
 
+        ///////////////////// PRIVATE FUNCTION /////////////////////
+
         private RuleName MappingRuleNameModelForDatabase(RuleNameModel ruleNameModel, RuleName ruleName)
         {
             ruleName.Name = ruleNameModel.Name;
