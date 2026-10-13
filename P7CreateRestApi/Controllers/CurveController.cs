@@ -20,8 +20,9 @@ namespace P7CreateRestApi.Controllers
             _curvePointService = curvePointService;
         }
 
-
-        // GET : All CurvePoint
+        /// <summary>
+        /// GET: Returns all curve points in DTO format.
+        /// </summary>
         [HttpGet("List")]
         public async Task<IActionResult> GetAllCurvePoint()
         {
@@ -29,7 +30,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(curvePoint);
         }
 
-        // GET : CurvePoint by ID
+        /// <summary>
+        /// GET: Returns a curve point by id in DTO format.
+        /// </summary>
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetCurvePointById(int id)
         {
@@ -40,7 +43,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(curvePoint);
         }
 
-        // POST : New CurvePoint
+        /// <summary>
+        /// POST: Creates a curve point from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPost("Creation")]
         public async Task<IActionResult> AddCurvePoint([FromBody] CurvePointModel curvePointModel)
         {
@@ -50,7 +55,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(result.Data);
         }
 
-        // GET : CurvePointModel by ID for UpdateForm
+        /// <summary>
+        /// GET: Returns a curve point by id in model format, to prefill the update form.
+        /// </summary>
         [HttpGet("FormUpdate/{id}")]
         public async Task<IActionResult> ShowUpdateForm(int id)
         {
@@ -60,7 +67,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(curvePointModel);
         }
 
-        // PUT : Update CurvePoint with CurvePointModel
+        /// <summary>
+        /// PUT: Updates a curve point by id from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPut("Modification/{id}")]
         public async Task<IActionResult> UpdateCurvePoint(int id, [FromBody] CurvePointModel curvePointModel)
         {
@@ -70,7 +79,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(result.Data);
         }
 
-        // DELETE : Delete CurvePoint by ID
+        /// <summary>
+        /// DELETE: Deletes a curve point by id.
+        /// </summary>
         [HttpDelete("Removal/{id}")]
         public async Task<IActionResult> DeleteCurvePoint(int id)
         {

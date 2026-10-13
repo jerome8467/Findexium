@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Ressource;
-using P7CreateRestApi.Service;
 using P7CreateRestApi.Service.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
@@ -21,15 +20,19 @@ namespace P7CreateRestApi.Controllers
             _tradeService = tradeService;
         }
 
-        // GET : All Trade
-        [HttpGet("list")]
+        /// <summary>
+        /// GET: Returns all trades in DTO format.
+        /// </summary>
+        [HttpGet("List")]
         public async Task<IActionResult> GetAllTrade()
         {
             IEnumerable<TradeDto> trades = await _tradeService.GetAllTrade();
             return Ok(trades);
         }
 
-        // GET : Trade by ID
+        /// <summary>
+        /// GET: Returns a trade by id in DTO format.
+        /// </summary>
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetTradById(int id)
         {
@@ -41,7 +44,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(trade);
         }
 
-        // POST : new Trade
+        /// <summary>
+        /// POST: Creates a trade from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPost("Creation")]
         public async Task<IActionResult> AddTrade([FromBody]TradeModel tradeModel)
         {
@@ -52,7 +57,9 @@ namespace P7CreateRestApi.Controllers
             return Ok (result.Data);
         }
 
-        // Get : TradeMOdel by ID for UpdateForme
+        /// <summary>
+        /// GET: Returns a trade by id in model format, to prefill the update form.
+        /// </summary>
         [HttpGet("FormUpdate/{id}")]
         public async Task<IActionResult> ShowUpdateForm(int id)
         {
@@ -62,10 +69,13 @@ namespace P7CreateRestApi.Controllers
             return Ok(tradeModel);
         }
 
-        // PUT : Update Trade with TradeModel
+        /// <summary>
+        /// PUT: Updates a trade by id from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPut("Modification/{id}")]
         public async Task<IActionResult> UpdateTrade(int id, [FromBody] TradeModel tradeModel)
         {
+            // Name of the connected user, read from the JWT token
             string username = User.Identity!.Name!;
             var result = await _tradeService.UpdateTrade(tradeModel, username, id);
             if (result.Errors.Any())
@@ -73,7 +83,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(result.Data);
         }
 
-        // DELETE : Delete Trade by ID
+        /// <summary>
+        /// DELETE: Deletes a trade by id.
+        /// </summary>
         [HttpDelete("Removal/{id}")]
         public async Task<IActionResult> DeleteTrade(int id)
         {

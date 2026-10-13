@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Dto;
 using P7CreateRestApi.Models.UserModel;
 using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service.Interfaces;
-using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -13,97 +13,81 @@ namespace P7CreateRestApi.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
-        private IUserService _userService;
+        private readonly IUserService _userService;
 
         public UserController(IUserService userService)
         {
             _userService = userService;
         }
 
-        // GET : All Users
-        [HttpGet("list")]
-        public async Task<IActionResult> GetAllUsers()
-        {
-            IEnumerable<UserDto> usersDtos = await _userService.GetAllUser();
+        // Id of the connected user
+        private int CurrentUserId => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            return Ok(usersDtos);
-        }
-
-        // GET : User By Username
-        [HttpGet("DetailsByUsername/{username}")]
-        public async Task<IActionResult> GetUserByUsername(string username)
+        /// <summary>
+        /// GET: Returns the connected user in DTO format.
+        /// </summary>
+        [HttpGet("Profile")]
+        public async Task<IActionResult> GetProfile()
         {
-            UserDto usersDto = await _userService.GetUserByUsername(username);
-            if (usersDto == null)
+            UserDto? userDto = await _userService.GetUserById(CurrentUserId);
+            if (userDto == null)
                 return NotFound(new { message = UserModelRessources.UserNotFound });
 
-            return Ok(usersDto);
+            return Ok(userDto);
         }
 
-        // GET : User By ID
-        [HttpGet("DetailsById/{id}")]
-        public async Task<IActionResult> GetUserById(int id)
-        {
-            UserDto usersDto = await _userService.GetUserById(id);
-            if(usersDto == null)
-                return NotFound(new {message = UserModelRessources.UserNotFound});
-
-            return Ok(usersDto);
-        }
-
-        // POST : New User
+        /// <summary>
+        /// POST: Creates a user with the default role and returns it in DTO format.
+        /// No authentication required.
+        /// </summary>
         [HttpPost("Creation")]
         [AllowAnonymous]
-        public async Task<IActionResult> AddNewUser(SignUpModel signUpModel)
+        public async Task<IActionResult> AddNewUser([FromBody] UserSignUpModel userSignUpModel)
         {
-            var result = await _userService.AddUser(signUpModel);
-            if(result.Errors.Any())
+            var result = await _userService.AddUser(userSignUpModel);
+            if (result.Errors.Any())
                 return BadRequest(result.Errors);
 
             return Ok(result.Data);
         }
 
-        // GET : User by ID for UpdateForm
-        [HttpGet("FormUpdate/{id}")]
-        public async Task<IActionResult> ShowUpdateForm(int id)
+        /// <summary>
+        /// GET: Returns the connected user in model format for update form.
+        /// </summary>
+        [HttpGet("FormUpdate")]
+        public async Task<IActionResult> ShowUpdateForm()
         {
-            UpdateUserModel? updateUserModel = await _userService.GetUpdateUserModelById(id);
-            if(updateUserModel == null)
+            UserUpdateModel? userUpdateModel = await _userService.GetUserUpdateModelById(CurrentUserId);
+            if (userUpdateModel == null)
                 return NotFound(new { message = UserModelRessources.UserNotFound });
 
-            return Ok(updateUserModel);
+            return Ok(userUpdateModel);
         }
 
-        // PUT : Update User with UpdateUserModel
-        [HttpPut("Modification/{id}")]
-        public async Task<IActionResult> UpdateUser(UpdateUserModel updateUserModel, int id)
+        /// <summary>
+        /// PUT: Updates the connected user, keeping its role, and returns it in DTO format.
+        /// </summary>
+        [HttpPut("Modification")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateModel userUpdateModel)
         {
-            var result = await _userService.UpdateUser(updateUserModel, id);
-            if (result.Errors.Any())
-                return BadRequest(result.Errors);
-            return Ok(result.Data);
-        }
-
-        // PUT : Change Password with old and new
-        [HttpPut("ChangePassword/{id}")]
-        public async Task<IActionResult> ChangePassword(ChangePasswordModel changePasswordModel, int id)
-        {
-            var result = await _userService.ChangePassword(changePasswordModel, id);
+            var result = await _userService.UpdateUser(userUpdateModel, CurrentUserId);
             if (result.Errors.Any())
                 return BadRequest(result.Errors);
 
             return Ok(result.Data);
         }
 
-        // DELETE : Delete User by ID
-        [HttpDelete("Removal/{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        /// <summary>
+        /// PUT: Changes the password of the connected user, after checking the old one.
+        /// </summary>
+        [HttpPut("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel changePasswordModel)
         {
-            List<ValidationResult> errors = await _userService.DeleteUser(id);
-            if (errors.Any())
-                return NotFound(errors);
-            return Ok();
-        }
+            var result = await _userService.ChangePassword(changePasswordModel, CurrentUserId);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
 
+            return Ok(result.Data);
+        }
     }
 }

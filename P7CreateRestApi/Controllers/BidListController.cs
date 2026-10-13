@@ -21,7 +21,9 @@ namespace P7CreateRestApi.Controllers
             _BidListService = bidListService;
         }
 
-        // GET : All BidList
+        /// <summary>
+        /// GET: Returns all bid lists in DTO format.
+        /// </summary>
         [HttpGet("List")]
         public async Task<IActionResult> GetAllBidList()
         {
@@ -29,21 +31,25 @@ namespace P7CreateRestApi.Controllers
             return Ok(bidLists);
         }
 
-        // GET : BidList by ID
+        /// <summary>
+        /// GET: Returns a bid list by id in DTO format.
+        /// </summary>
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetBidListById(int id)
         {
             BidListDto? bidlist = await _BidListService.GetBidListById(id);
             if (bidlist == null)
                 return NotFound(new { message = BidListModelRessources.BidListNotFound });
-
             return Ok(bidlist);
         }
 
-        // POST : New Bidlist
+        /// <summary>
+        /// POST: Creates a bid list from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPost("Creation")]
         public async Task<IActionResult> AddNewBidList([FromBody] BidListModel bidList)
         {
+            // Name of the connected user, read from the JWT token
             string username = User.Identity!.Name!;
             var result = await _BidListService.AddBidList(bidList, username);
             if (result.Errors.Any())
@@ -51,7 +57,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(result.Data);
         }
 
-        // GET : BidListModel by ID for UpdateForm
+        /// <summary>
+        /// GET: Returns a bid list by id in model format, to prefill the update form.
+        /// </summary>
         [HttpGet("FormUpdate/{id}")]
         public async Task<IActionResult> ShowUpdateForm(int id)
         {
@@ -61,10 +69,13 @@ namespace P7CreateRestApi.Controllers
             return Ok(bidListModel);
         }
 
-        // PUT : Update BidList with BidListModel
+        /// <summary>
+        /// PUT: Updates a bid list by id from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPut("Modification/{id}")]
         public async Task<IActionResult> UpdateBidList(int id, [FromBody] BidListModel bidListModel)
         {
+            // Name of the connected user, read from the JWT token
             string username = User.Identity!.Name!;
             var result = await _BidListService.UpdateBidList(bidListModel, username, id);
             if (result.Errors.Any())
@@ -72,7 +83,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(result.Data);
         }
 
-        // DELETE : Delete Bidlist by ID
+        /// <summary>
+        /// DELETE: Deletes a bid list by id.
+        /// </summary>
         [HttpDelete("Removal/{id}")]
         public async Task<IActionResult> DeleteBidList(int id)
         {

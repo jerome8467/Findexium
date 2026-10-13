@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using P7CreateRestApi.Controllers;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Ressource;
-using P7CreateRestApi.Service;
 using P7CreateRestApi.Service.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
@@ -22,7 +20,9 @@ namespace P7CreateRestApi.Controllers
             _ratingService = ratingService;
         }
 
-        // GET : All Rating
+        /// <summary>
+        /// GET: Returns all ratings in DTO format.
+        /// </summary>
         [HttpGet("List")]
         public async Task<IActionResult> GetAllRating()
         {
@@ -30,7 +30,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(rating);
         }
 
-        // GET : Rating by ID
+        /// <summary>
+        /// GET: Returns a rating by id in DTO format.
+        /// </summary>
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetRatingById(int id)
         {
@@ -41,7 +43,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(rating);
         }
 
-        // POST : New Rating
+        /// <summary>
+        /// POST: Creates a rating from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPost("Creation")]
         public async Task<IActionResult> AddRating([FromBody] RatingModel ratingModel)
         {
@@ -51,7 +55,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(result.Data);
         }
 
-        // GET : RatingModel by ID for UpdateForm
+        /// <summary>
+        /// GET: Returns a rating by id in model format, to prefill the update form.
+        /// </summary>
         [HttpGet("FormUpdate/{id}")]
         public async Task<IActionResult> ShowUpdateForm(int id)
         {
@@ -61,7 +67,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(ratingModel);
         }
 
-        // PUT : Update Rating with RatingModel
+        /// <summary>
+        /// PUT: Updates a rating by id from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPut("Modification/{id}")]
         public async Task<IActionResult> UpdateRating(int id, [FromBody] RatingModel ratingModel)
         {
@@ -71,7 +79,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(result.Data);
         }
 
-        // DELETE : Delete Rating by ID
+        /// <summary>
+        /// DELETE: Deletes a rating by id.
+        /// </summary>
         [HttpDelete("Removal/{id}")]
         public async Task<IActionResult> DeleteRating(int id)
         {

@@ -32,10 +32,10 @@ namespace Test_P7CreateRestApi.Unitaire.UserTest
 
             _passwordHasher = new PasswordHasher<User>();
 
-            _dbContext.Users.Add(CreateValidUser(1, "Username1", "Password1!"));
-            _dbContext.Users.Add(CreateValidUser(2, "Username2", "Password2!"));
-            _dbContext.Users.Add(CreateValidUser(3, "Username3", "Password3!"));
-            _dbContext.Users.Add(CreateValidUser(4, "Username4", "Password4!"));
+            _dbContext.Users.Add(CreateValidUser(1, "Username1", "Password1!", "Admin"));
+            _dbContext.Users.Add(CreateValidUser(2, "Username2", "Password2!", "User"));
+            _dbContext.Users.Add(CreateValidUser(3, "Username3", "Password3!", "User"));
+            _dbContext.Users.Add(CreateValidUser(4, "Username4", "Password4!", "User"));
             _dbContext.SaveChanges();
 
             _userRepository = new UserRepository(_dbContext);
@@ -55,14 +55,14 @@ namespace Test_P7CreateRestApi.Unitaire.UserTest
             _userService = new UserService(_userRepository, _passwordHasher, tokenService);
         }
 
-        public User CreateValidUser(int id, string username, string password)
+        public User CreateValidUser(int id, string username, string password, string role)
         {
             User user = new User
             {
                 Id = id,
                 Username = username,
                 Fullname = "Test",
-                Role = "Test"
+                Role = role
             };
             user.Password = _passwordHasher.HashPassword(user, password);
 
@@ -83,6 +83,8 @@ namespace Test_P7CreateRestApi.Unitaire.UserTest
 
             // ASSERT
             Assert.Equal(4, users.Count());
+            Assert.Contains(users, u => u.Username == "Username1" && u.Role == UserRole.Admin);
+            Assert.Contains(users, u => u.Username == "Username3" && u.Role == UserRole.User);
         }
 
         [Fact]
@@ -95,6 +97,7 @@ namespace Test_P7CreateRestApi.Unitaire.UserTest
             Assert.NotNull(userDto);
             Assert.Equal(2, userDto?.Id);
             Assert.Equal("Username2", userDto?.Username);
+            Assert.Equal(UserRole.User, userDto?.Role);
         }
 
         [Fact]
@@ -107,33 +110,35 @@ namespace Test_P7CreateRestApi.Unitaire.UserTest
             Assert.NotNull(userDto);
             Assert.Equal(1, userDto?.Id);
             Assert.Equal("Username1", userDto?.Username);
+            Assert.Equal(UserRole.Admin, userDto?.Role);
         }
 
         [Fact]
         public async Task Service_GetUpdateUserModelById()
         {
             // ACT
-            UpdateUserModel? updateUserModel = await _userService.GetUpdateUserModelById(3);
+            AdminUpdateModel? adminUpdateModel = await _userService.GetAdminUpdateModelById(3);
 
             // ASSERT
-            Assert.NotNull(updateUserModel);
-            Assert.Equal("Username3", updateUserModel?.Username);
+            Assert.NotNull(adminUpdateModel);
+            Assert.Equal("Username3", adminUpdateModel?.Username);
+            Assert.Equal(UserRole.User, adminUpdateModel?.Role);
         }
 
         [Fact]
-        public async Task Service_AddUser()
+        public async Task Service_AddUserByAdmin()
         {
             // ARRANGE
-            SignUpModel signUpModel = new SignUpModel
+            AdminSignUpModel adminSignUpModel = new AdminSignUpModel
             {
                 Username = "Username5",
                 Password = "Password5!",
                 Fullname = "Test",
-                Role = "Test"
+                Role = UserRole.User
             };
 
             // ACT
-            ServiceResult<UserDto> serviceResult = await _userService.AddUser(signUpModel);
+            ServiceResult<UserDto> serviceResult = await _userService.AddUserByAdmin(adminSignUpModel);
             User? user = await _dbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username == "Username5");
@@ -144,23 +149,24 @@ namespace Test_P7CreateRestApi.Unitaire.UserTest
             Assert.NotNull(user);
             Assert.Equal(5, user?.Id);
             Assert.Equal("Username5", user?.Username);
+            Assert.Equal("User", user?.Role);
             Assert.NotEqual("Password5!", user?.Password);
             Assert.Equal(5, userCount);
         }
 
         [Fact]
-        public async Task Service_UpdateUser()
+        public async Task Service_UpdateUserByAdmin()
         {
             // ARRANGE
-            UpdateUserModel updateUserModel = new UpdateUserModel
+            AdminUpdateModel adminUpdateModel = new AdminUpdateModel
             {
                 Username = "Username1Update",
                 Fullname = "FullnameUpdate",
-                Role = "RoleUpdate"
+                Role = UserRole.User
             };
 
             // ACT
-            ServiceResult<UserDto> serviceResult = await _userService.UpdateUser(updateUserModel, 1);
+            ServiceResult<UserDto> serviceResult = await _userService.UpdateUserByAdmin(adminUpdateModel, 1);
             User user = await _dbContext.Users
                 .AsNoTracking()
                 .FirstAsync(u => u.Id == 1);
@@ -169,7 +175,69 @@ namespace Test_P7CreateRestApi.Unitaire.UserTest
             Assert.Empty(serviceResult.Errors);
             Assert.Equal("Username1Update", user.Username);
             Assert.Equal("FullnameUpdate", user.Fullname);
-            Assert.Equal("RoleUpdate", user.Role);
+            Assert.Equal("User", user.Role);
+        }
+
+        [Fact]
+        public async Task Service_AddUser()
+        {
+            // ARRANGE
+            UserSignUpModel userSignUpModel = new UserSignUpModel
+            {
+                Username = "Username5",
+                Password = "Password5!",
+                Fullname = "Test"
+            };
+
+            // ACT
+            ServiceResult<UserDto> serviceResult = await _userService.AddUser(userSignUpModel);
+            User? user = await _dbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Username == "Username5");
+            int userCount = await _dbContext.Users.CountAsync();
+
+            // ASSERT
+            Assert.Empty(serviceResult.Errors);
+            Assert.NotNull(user);
+            Assert.Equal(5, user?.Id);
+            Assert.Equal("Username5", user?.Username);
+            Assert.Equal("User", user?.Role);
+            Assert.NotEqual("Password5!", user?.Password);
+            Assert.Equal(5, userCount);
+        }
+
+        [Fact]
+        public async Task Service_GetUserUpdateModelById()
+        {
+            // ACT
+            UserUpdateModel? userUpdateModel = await _userService.GetUserUpdateModelById(3);
+
+            // ASSERT
+            Assert.NotNull(userUpdateModel);
+            Assert.Equal("Username3", userUpdateModel?.Username);
+            Assert.Equal("Test", userUpdateModel?.Fullname);
+        }
+
+        [Fact]
+        public async Task Service_UpdateUser()
+        {
+            // ARRANGE
+            UserUpdateModel userUpdateModel = new UserUpdateModel
+            {
+                Username = "Username2Update",
+                Fullname = "FullnameUpdate"
+            };
+
+            // ACT
+            ServiceResult<UserDto> serviceResult = await _userService.UpdateUser(userUpdateModel, 2);
+            User user = await _dbContext.Users
+                .AsNoTracking()
+                .FirstAsync(u => u.Id == 2);
+
+            // ASSERT
+            Assert.Empty(serviceResult.Errors);
+            Assert.Equal("Username2Update", user.Username);
+            Assert.Equal("FullnameUpdate", user.Fullname);
         }
 
         [Fact]
@@ -201,10 +269,10 @@ namespace Test_P7CreateRestApi.Unitaire.UserTest
         }
 
         [Fact]
-        public async Task Service_DeleteUser()
+        public async Task Service_DeleteUserByAdmin()
         {
             // ACT
-            List<ValidationResult> errors = await _userService.DeleteUser(2);
+            List<ValidationResult> errors = await _userService.DeleteUserByAdmin(2);
             IEnumerable<User> users = await _dbContext.Users
                 .AsNoTracking()
                 .ToListAsync();

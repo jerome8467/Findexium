@@ -30,8 +30,4 @@
     <ProjectReference Include="..\P7CreateRestApi\P7CreateRestApi.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Integration\" />
-  </ItemGroup>
-
 </Project>

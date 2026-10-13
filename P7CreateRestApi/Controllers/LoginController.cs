@@ -15,6 +15,9 @@ namespace P7CreateRestApi.Controllers
             _userService = userService;
         }
 
+        /// <summary>
+        /// POST: Returns a JWT token if the credentials are valid, otherwise 401 Unauthorized.
+        /// </summary>
         [HttpPost]
         [Route("Access")]
         public async Task<IActionResult> Login([FromBody] LoginModel loginModel)

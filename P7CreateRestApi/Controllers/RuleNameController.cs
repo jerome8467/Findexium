@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Ressource;
-using P7CreateRestApi.Service;
 using P7CreateRestApi.Service.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
@@ -21,7 +20,9 @@ namespace P7CreateRestApi.Controllers
             _ruleNameService = ruleNameService;
         }
 
-        // GET : All RuleName
+        /// <summary>
+        /// GET: Returns all rule names in DTO format.
+        /// </summary>
         [HttpGet("List")]
         public async Task<IActionResult> GetAllRuleName()
         {
@@ -29,7 +30,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(ruleNames);
         }
 
-        // GET : RuleName by ID
+        /// <summary>
+        /// GET: Returns a rule name by id in DTO format.
+        /// </summary>
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> GetRuleNameById(int id)
         {
@@ -40,7 +43,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(ruleName);
         }
 
-        // POST : New RuleName
+        /// <summary>
+        /// POST: Creates a rule name from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPost("Creation")]
         public async Task<IActionResult> AddRuleName([FromBody] RuleNameModel ruleNameModel)
         {
@@ -50,7 +55,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(result.Data);
         }
 
-        // GET : RuleNameModel by ID for UpdateForm
+        /// <summary>
+        /// GET: Returns a rule name by id in model format, to prefill the update form.
+        /// </summary>
         [HttpGet("FormUpdate/{id}")]
         public async Task<IActionResult> ShowUpdateForm(int id)
         {
@@ -60,7 +67,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(ruleNameModel);
         }
 
-        // PUT : Update RuleName with RuleNameModel
+        /// <summary>
+        /// PUT: Updates a rule name by id from the submitted model and returns it in DTO format.
+        /// </summary>
         [HttpPut("Modification/{id}")]
         public async Task<IActionResult> UpdateRuleName(int id, [FromBody] RuleNameModel ruleNameModel)
         {
@@ -70,7 +79,9 @@ namespace P7CreateRestApi.Controllers
             return Ok(result.Data);
         }
 
-        // DELETE : Delete RuleName by ID
+        /// <summary>
+        /// DELETE: Deletes a rule name by id.
+        /// </summary>
         [HttpDelete("Removal/{id}")]
         public async Task<IActionResult> DeleteRuleName(int id)
         {

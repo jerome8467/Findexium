@@ -6,6 +6,7 @@ using P7CreateRestApi.Repositories.Interfaces;
 using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 
 namespace P7CreateRestApi.Service
 {
@@ -24,6 +25,9 @@ namespace P7CreateRestApi.Service
             _tokenService = tokenService;
         }
 
+        /// <summary>
+        /// Returns all users in DTO format.
+        /// </summary>
         public async Task<IEnumerable<UserDto>> GetAllUser()
         {
             IEnumerable<User> UsersList = await _userRepository.GetAllUser();
@@ -35,16 +39,22 @@ namespace P7CreateRestApi.Service
             return UsersDtoList;
         }
 
-        public async Task<UserDto> GetUserByUsername(string username)
+        /// <summary>
+        /// Returns a user by username in DTO format, or null if it does not exist.
+        /// </summary>
+        public async Task<UserDto?> GetUserByUsername(string username)
         {
             User? user = await _userRepository.GetUserByUsername(username);
-            if (user == null) 
+            if (user == null)
                 return null;
 
             return MappingUserToDto(user);
         }
 
-        public async Task<UserDto> GetUserById(int id)
+        /// <summary>
+        /// Returns a user by id in DTO format, or null if it does not exist.
+        /// </summary>
+        public async Task<UserDto?> GetUserById(int id)
         {
             User? user = await _userRepository.GetUserById(id);
             if (user == null)
@@ -53,30 +63,18 @@ namespace P7CreateRestApi.Service
             return MappingUserToDto(user);
         }
 
-        public async Task<UpdateUserModel> GetUpdateUserModelById(int id)
+        /// <summary>
+        /// Creates a user with the role chosen by the admin and returns it in DTO format, or the validation errors.
+        /// </summary>
+        public async Task<ServiceResult<UserDto>> AddUserByAdmin(AdminSignUpModel adminSignUpModel)
         {
-            User? user = await _userRepository.GetUserById(id);
-            if (user == null)
-                return null;
-
-            UpdateUserModel updateUserModel = new UpdateUserModel
-            {
-                Username = user.Username,
-                Fullname = user.Fullname,
-                Role = user.Role,
-            };
-            return updateUserModel;
-        }
-
-        public async Task<ServiceResult<UserDto>> AddUser(SignUpModel signUpModel)
-        {
-            ValidationContext context = new ValidationContext(signUpModel);
+            ValidationContext context = new ValidationContext(adminSignUpModel);
             var result = new ServiceResult<UserDto>();
 
-            if (!Validator.TryValidateObject(signUpModel, context, result.Errors, true))
+            if (!Validator.TryValidateObject(adminSignUpModel, context, result.Errors, true))
                 return result;
 
-            User? findUser = await _userRepository.GetUserByUsername(signUpModel.Username);
+            User? findUser = await _userRepository.GetUserByUsername(adminSignUpModel.Username);
             if (findUser != null)
             {
                 result.Errors.Add(new ValidationResult(UserModelRessources.UsernameUnavailable));
@@ -85,24 +83,45 @@ namespace P7CreateRestApi.Service
 
             User user = new User
             {
-                Username = signUpModel.Username,
-                Fullname = signUpModel.Fullname,
-                Role = signUpModel.Role
+                Username = adminSignUpModel.Username,
+                Fullname = adminSignUpModel.Fullname,
+                Role = adminSignUpModel.Role.ToString()
             };
-            user.Password = _passwordHasher.HashPassword(user, signUpModel.Password);
+            user.Password = _passwordHasher.HashPassword(user, adminSignUpModel.Password);
 
             await _userRepository.AddUser(user);
 
-            result.Data = MappingUserToDto(user); ;
+            result.Data = MappingUserToDto(user);
             return result;
         }
 
-        public async Task<ServiceResult<UserDto>> UpdateUser(UpdateUserModel model, int id)
+        /// <summary>
+        /// Returns a user by id in admin update model format, or null if it does not exist.
+        /// </summary>
+        public async Task<AdminUpdateModel?> GetAdminUpdateModelById(int id)
         {
-            ValidationContext context = new ValidationContext(model);
+            User? user = await _userRepository.GetUserById(id);
+            if (user == null)
+                return null;
+
+            AdminUpdateModel adminUpdateModel = new AdminUpdateModel
+            {
+                Username = user.Username,
+                Fullname = user.Fullname,
+                Role = Enum.Parse<UserRole>(user.Role)
+            };
+            return adminUpdateModel;
+        }
+
+        /// <summary>
+        /// Updates a user by id, including its role, and returns it in DTO format, or the validation errors.
+        /// </summary>
+        public async Task<ServiceResult<UserDto>> UpdateUserByAdmin(AdminUpdateModel adminUpdateModel, int id)
+        {
+            ValidationContext context = new ValidationContext(adminUpdateModel);
             var result = new ServiceResult<UserDto>();
 
-            if (!Validator.TryValidateObject(model, context, result.Errors, true))
+            if (!Validator.TryValidateObject(adminUpdateModel, context, result.Errors, true))
                 return result;
 
             User? findUser = await _userRepository.GetUserById(id);
@@ -112,16 +131,16 @@ namespace P7CreateRestApi.Service
                 return result;
             }
 
-            User? sameUsername = await _userRepository.GetUserByUsername(model.Username);
+            User? sameUsername = await _userRepository.GetUserByUsername(adminUpdateModel.Username);
             if (sameUsername != null && sameUsername.Id != id)
             {
                 result.Errors.Add(new ValidationResult(UserModelRessources.UsernameUnavailable));
                 return result;
             }
 
-            findUser.Username = model.Username;
-            findUser.Fullname = model.Fullname;
-            findUser.Role = model.Role;
+            findUser.Username = adminUpdateModel.Username;
+            findUser.Fullname = adminUpdateModel.Fullname;
+            findUser.Role = adminUpdateModel.Role.ToString();
 
             await _userRepository.UpdateUser(findUser);
 
@@ -129,12 +148,69 @@ namespace P7CreateRestApi.Service
             return result;
         }
 
-        public async Task<ServiceResult<UserDto>> ChangePassword(ChangePasswordModel changePassword, int id)
+        /// <summary>
+        /// Creates a user with the default role and returns it in DTO format, or the validation errors.
+        /// </summary>
+        public async Task<ServiceResult<UserDto>> AddUser(UserSignUpModel userSignUpModel)
+        {
+            AdminSignUpModel adminSignUpModel = new AdminSignUpModel
+            {
+                Username = userSignUpModel.Username,
+                Password = userSignUpModel.Password,
+                Fullname = userSignUpModel.Fullname,
+                Role = UserRole.User
+            };
+            return await AddUserByAdmin(adminSignUpModel);
+        }
+
+        /// <summary>
+        /// Returns a user by id in user update model format, or null if it does not exist.
+        /// </summary>
+        public async Task<UserUpdateModel?> GetUserUpdateModelById(int id)
+        {
+            User? user = await _userRepository.GetUserById(id);
+            if (user == null)
+                return null;
+
+            UserUpdateModel userUpdateModel = new UserUpdateModel
+            {
+                Username = user.Username,
+                Fullname = user.Fullname
+            };
+            return userUpdateModel;
+        }
+
+        /// <summary>
+        /// Updates a user by id, keeping its current role, and returns it in DTO format, or the validation errors.
+        /// </summary>
+        public async Task<ServiceResult<UserDto>> UpdateUser(UserUpdateModel userUpdateModel, int id)
+        {
+            User? findUser = await _userRepository.GetUserById(id);
+            if (findUser == null)
+            {
+                var result = new ServiceResult<UserDto>();
+                result.Errors.Add(new ValidationResult(UserModelRessources.UserNotFound));
+                return result;
+            }
+            AdminUpdateModel adminUpdateModel = new AdminUpdateModel
+            {
+                Username = userUpdateModel.Username,
+                Fullname = userUpdateModel.Fullname,
+                Role = Enum.Parse<UserRole>(findUser.Role)
+            };
+
+            return await UpdateUserByAdmin(adminUpdateModel, id);
+        }
+
+        /// <summary>
+        /// Changes the password of a user by id, after checking the old one, and returns the user in DTO format, or the errors.
+        /// </summary>
+        public async Task<ServiceResult<UserDto>> ChangePassword(ChangePasswordModel changePasswordModel, int id)
         {
             var result = new ServiceResult<UserDto>();
-            ValidationContext context = new ValidationContext(changePassword);
+            ValidationContext context = new ValidationContext(changePasswordModel);
 
-            if (!Validator.TryValidateObject(changePassword, context, result.Errors, true))
+            if (!Validator.TryValidateObject(changePasswordModel, context, result.Errors, true))
                 return result;
 
             User? findUser = await _userRepository.GetUserById(id);
@@ -144,21 +220,24 @@ namespace P7CreateRestApi.Service
                 return result;
             }
 
-            var verifyOldPassword = _passwordHasher.VerifyHashedPassword(findUser, findUser.Password, changePassword.OldPassword);
+            var verifyOldPassword = _passwordHasher.VerifyHashedPassword(findUser, findUser.Password, changePasswordModel.OldPassword);
             if (verifyOldPassword == PasswordVerificationResult.Failed)
             {
                 result.Errors.Add(new ValidationResult(UserModelRessources.OldPasswordIncorrect));
                 return result;
             }
 
-            findUser.Password = _passwordHasher.HashPassword(findUser, changePassword.NewPassword);
+            findUser.Password = _passwordHasher.HashPassword(findUser, changePasswordModel.NewPassword);
             await _userRepository.UpdateUser(findUser);
 
             result.Data = MappingUserToDto(findUser);
             return result;
         }
 
-        public async Task<List<ValidationResult>> DeleteUser(int id)
+        /// <summary>
+        /// Deletes a user by id and returns an empty list, or an error if the user does not exist.
+        /// </summary>
+        public async Task<List<ValidationResult>> DeleteUserByAdmin(int id)
         {
             List<ValidationResult> result = new List<ValidationResult>();
 
@@ -173,6 +252,9 @@ namespace P7CreateRestApi.Service
             return result;
         }
 
+        /// <summary>
+        /// Returns a JWT token if the credentials are valid, otherwise null.
+        /// </summary>
         public async Task<string?> Login(LoginModel loginModel)
         {
             User? user = await _userRepository.GetUserByUsername(loginModel.Username);
@@ -195,7 +277,7 @@ namespace P7CreateRestApi.Service
                 Id = user.Id,
                 Username = user.Username,
                 Fullname = user.Fullname,
-                Role = user.Role
+                Role = Enum.Parse<UserRole>(user.Role)
             };
 
             return userDto;
