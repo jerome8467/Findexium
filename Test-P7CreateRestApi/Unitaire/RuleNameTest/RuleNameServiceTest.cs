@@ -36,7 +36,7 @@ namespace Test_P7CreateRestApi.Unitaire.RuleNameTest
             _ruleNameService = new RuleNameService(_ruleNameRepository);
         }
 
-        public RuleName CreateValidRuleName(int id, string Name, string Description, string Json, string Template, string SqlStr, string SqlPart)
+        private RuleName CreateValidRuleName(int id, string Name, string Description, string Json, string Template, string SqlStr, string SqlPart)
         {
             return new RuleName
             {

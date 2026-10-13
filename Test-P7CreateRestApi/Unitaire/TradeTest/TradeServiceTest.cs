@@ -38,7 +38,7 @@ namespace Test_P7CreateRestApi.Unitaire.TradeTest
             _tradeService = new TradeService(_tradeRepository);
         }
 
-        public Trade CreateValideTrade(int id, string Account, string CreationName)
+        private Trade CreateValideTrade(int id, string Account, string CreationName)
         {
             return new Trade
             {
