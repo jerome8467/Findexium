@@ -18,7 +18,5 @@ namespace P7CreateRestApi.Data
         public DbSet<RuleName> RuleNames { get; set; }
         public DbSet<Trade> Trades { get; set; }
         public DbSet<User> Users { get; set;}
-
-
     }
 }

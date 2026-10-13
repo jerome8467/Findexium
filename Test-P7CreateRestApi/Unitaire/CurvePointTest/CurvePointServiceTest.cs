@@ -4,8 +4,10 @@ using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Repositories;
 using P7CreateRestApi.Repositories.Interfaces;
+using P7CreateRestApi.Ressource;
 using P7CreateRestApi.Service;
 using P7CreateRestApi.Service.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using Xunit;
 
@@ -74,6 +76,16 @@ namespace Test_P7CreateRestApi.Unitaire.CurvePointTest
         }
 
         [Fact]
+        public async Task Service_GetCurvePointById_NotFound()
+        {
+            // ACT
+            CurvePointDto? curvePointDto = await _curvePointService.GetCurvePointById(5);
+
+            // ASSERT
+            Assert.Null(curvePointDto);
+        }
+
+        [Fact]
         public async Task Service_GetCurvePointModelById()
         {
             // ACT
@@ -82,6 +94,16 @@ namespace Test_P7CreateRestApi.Unitaire.CurvePointTest
             // ASSERT
             Assert.NotNull(curvePointModel);
             Assert.Equal(10, curvePointModel?.CurveId);
+        }
+
+        [Fact]
+        public async Task Service_GetCurvePointModelById_NotFound()
+        {
+            // ACT
+            CurvePointModel? curvePointModel = await _curvePointService.GetCurvePointModelById(5);
+
+            // ASSERT
+            Assert.Null(curvePointModel);
         }
 
         [Fact]
@@ -104,6 +126,60 @@ namespace Test_P7CreateRestApi.Unitaire.CurvePointTest
             Assert.Equal(1, curvePoint.Id);
             Assert.Equal((byte)15, curvePoint.CurveId);
             Assert.Empty(serviceResult?.Errors);
+        }
+
+        [Fact]
+        public async Task Service_AddCurvePoint_InvalidModel()
+        {
+            // ARRANGE
+            CurvePointModel curvePointModel = new CurvePointModel
+            {
+                CurveId = null
+            };
+
+            // ACT
+            ServiceResult<CurvePointDto> serviceResult = await _curvePointService.AddCurvePoint(curvePointModel);
+
+            // ASSERT
+            Assert.Single(serviceResult.Errors);
+            Assert.Equal(CurvePointModelRessources.CurveIdRequired, serviceResult.Errors[0].ErrorMessage);
+            Assert.Null(serviceResult.Data);
+        }
+
+        [Fact]
+        public async Task Service_UpdateCurvePoint_InvalidModel()
+        {
+            // ARRANGE
+            CurvePointModel curvePointModel = new CurvePointModel
+            {
+                CurveId = 300
+            };
+
+            // ACT
+            ServiceResult<CurvePointDto> serviceResult = await _curvePointService.UpdateCurvePoint(curvePointModel, 1);
+
+            // ASSERT
+            Assert.Single(serviceResult.Errors);
+            Assert.Equal(CurvePointModelRessources.CurveIdRange, serviceResult.Errors[0].ErrorMessage);
+            Assert.Null(serviceResult.Data);
+        }
+
+        [Fact]
+        public async Task Service_UpdateCurvePoint_NotFound()
+        {
+            // ARRANGE
+            CurvePointModel curvePointModel = new CurvePointModel
+            {
+                CurveId = 15
+            };
+
+            // ACT
+            ServiceResult<CurvePointDto> serviceResult = await _curvePointService.UpdateCurvePoint(curvePointModel, 999);
+
+            // ASSERT
+            Assert.Single(serviceResult.Errors);
+            Assert.Equal(CurvePointModelRessources.CurvePointNotFound, serviceResult.Errors[0].ErrorMessage);
+            Assert.Null(serviceResult.Data);
         }
 
         [Fact]
@@ -145,6 +221,17 @@ namespace Test_P7CreateRestApi.Unitaire.CurvePointTest
             Assert.Contains(curvePoints, i => i.Id == 3);
             Assert.Contains(curvePoints, i => i.Id == 4);
             Assert.DoesNotContain(curvePoints, i => i.Id == 2);
+        }
+
+        [Fact]
+        public async Task Service_DeleteCurvePoint_NotFound()
+        {
+            // ACT
+            List<ValidationResult> errors = await _curvePointService.DeleteCurvePoint(5);
+
+            // ASSERT
+            Assert.Single(errors);
+            Assert.Equal(CurvePointModelRessources.CurvePointNotFound, errors[0].ErrorMessage);
         }
 
     }

@@ -87,7 +87,7 @@ namespace P7CreateRestApi.Controllers
         /// PUT: Updates user by id and returns DTO format.
         /// </summary>
         [HttpPut("Modification/{id}")]
-        public async Task<IActionResult> UpdateUser(AdminUpdateModel adminUpdateModel, int id)
+        public async Task<IActionResult> UpdateUser([FromBody] AdminUpdateModel adminUpdateModel, int id)
         {
             var result = await _userService.UpdateUserByAdmin(adminUpdateModel, id);
             if (result.Errors.Any())

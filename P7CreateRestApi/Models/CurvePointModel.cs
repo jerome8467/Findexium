@@ -1,5 +1,4 @@
-﻿using P7CreateRestApi.Attribute;
-using P7CreateRestApi.Ressource;
+﻿using P7CreateRestApi.Ressource;
 using System.ComponentModel.DataAnnotations;
 
 namespace P7CreateRestApi.Models

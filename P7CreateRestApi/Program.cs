@@ -91,6 +91,14 @@ builder.Services.AddDbContext<LocalDbContext>(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    LocalDbContext context = scope.ServiceProvider.GetRequiredService<LocalDbContext>();
+    IPasswordHasher<User> passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+
+    IdentitySeedData.EnsurePopulated(context, passwordHasher);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
