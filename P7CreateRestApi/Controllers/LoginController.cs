@@ -1,18 +1,31 @@
 using Microsoft.AspNetCore.Mvc;
-using P7CreateRestApi.Models;
-
-namespace Dot.Net.WebApi.Controllers
+using P7CreateRestApi.Models.UserModel;
+using P7CreateRestApi.Service.Interfaces;
+namespace P7CreateRestApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class LoginController : ControllerBase
-    {             
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+    {
+
+        private readonly IUserService _userService;
+
+        public LoginController(IUserService userService)
         {
-            //TODO: implement the UserManager from Identity to validate User and return a security token.
-            return Unauthorized();
+            _userService = userService;
+        }
+
+        /// <summary>
+        /// POST: Returns a JWT token if the credentials are valid, otherwise 401 Unauthorized.
+        /// </summary>
+        [HttpPost]
+        [Route("Access")]
+        public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
+        {
+            string? token = await _userService.Login(loginModel);
+            if (token == null)
+                return Unauthorized();
+            return Ok(new { token });
         }            
     }
 }

@@ -1,40 +1,100 @@
-using Dot.Net.WebApi.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models;
+using P7CreateRestApi.Ressource;
+using P7CreateRestApi.Service.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class BidListController : ControllerBase
     {
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody] BidList bidList)
+
+        private readonly IBidListService _BidListService;
+
+        public BidListController(IBidListService bidListService)
         {
-            // TODO: check data valid and save to db, after saving return bid list
+            _BidListService = bidListService;
+        }
+
+        /// <summary>
+        /// GET: Returns all bid lists in DTO format.
+        /// </summary>
+        [HttpGet("List")]
+        public async Task<IActionResult> GetAllBidList()
+        {
+            IEnumerable<BidListDto> bidLists = await _BidListService.GetAllBidList();
+            return Ok(bidLists);
+        }
+
+        /// <summary>
+        /// GET: Returns a bid list by id in DTO format.
+        /// </summary>
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> GetBidListById(int id)
+        {
+            BidListDto? bidlist = await _BidListService.GetBidListById(id);
+            if (bidlist == null)
+                return NotFound(new { message = BidListModelRessources.BidListNotFound });
+            return Ok(bidlist);
+        }
+
+        /// <summary>
+        /// POST: Creates a bid list from the submitted model and returns it in DTO format.
+        /// </summary>
+        [HttpPost("Creation")]
+        public async Task<IActionResult> AddNewBidList([FromBody] BidListModel bidList)
+        {
+            // Name of the connected user, read from the JWT token
+            string username = User.Identity!.Name!;
+            var result = await _BidListService.AddBidList(bidList, username);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// GET: Returns a bid list by id in model format, to prefill the update form.
+        /// </summary>
+        [HttpGet("FormUpdate/{id}")]
+        public async Task<IActionResult> ShowUpdateForm(int id)
+        {
+            BidListModel? bidListModel = await _BidListService.GetBidListModelById(id);
+            if (bidListModel == null)
+                return NotFound(new { message = BidListModelRessources.BidListNotFound });
+            return Ok(bidListModel);
+        }
+
+        /// <summary>
+        /// PUT: Updates a bid list by id from the submitted model and returns it in DTO format.
+        /// </summary>
+        [HttpPut("Modification/{id}")]
+        public async Task<IActionResult> UpdateBidList(int id, [FromBody] BidListModel bidListModel)
+        {
+            // Name of the connected user, read from the JWT token
+            string username = User.Identity!.Name!;
+            var result = await _BidListService.UpdateBidList(bidListModel, username, id);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
+            return Ok(result.Data);
+        }
+
+        /// <summary>
+        /// DELETE: Deletes a bid list by id.
+        /// </summary>
+        [HttpDelete("Removal/{id}")]
+        public async Task<IActionResult> DeleteBidList(int id)
+        {
+            List<ValidationResult> errors = await _BidListService.DeleteBidList(id);
+            if (errors.Any())
+                return NotFound(errors);
             return Ok();
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
-        {
-            return Ok();
-        }
 
-        [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateBid(int id, [FromBody] BidList bidList)
-        {
-            // TODO: check required fields, if valid call service to update Bid and return list Bid
-            return Ok();
-        }
-
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteBid(int id)
-        {
-            return Ok();
-        }
     }
 }

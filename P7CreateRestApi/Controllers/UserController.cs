@@ -1,85 +1,93 @@
-using Dot.Net.WebApi.Domain;
-using Dot.Net.WebApi.Repositories;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Dto;
+using P7CreateRestApi.Models.UserModel;
+using P7CreateRestApi.Ressource;
+using P7CreateRestApi.Service.Interfaces;
+using System.Security.Claims;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
-        private UserRepository _userRepository;
+        private readonly IUserService _userService;
 
-        public UserController(UserRepository userRepository)
+        public UserController(IUserService userService)
         {
-            _userRepository = userRepository;
+            _userService = userService;
         }
 
-        [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        // Id of the connected user
+        private int CurrentUserId => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        /// <summary>
+        /// GET: Returns the connected user in DTO format.
+        /// </summary>
+        [HttpGet("Profile")]
+        public async Task<IActionResult> GetProfile()
         {
-            return Ok();
+            UserDto? userDto = await _userService.GetUserById(CurrentUserId);
+            if (userDto == null)
+                return NotFound(new { message = UserModelRessources.UserNotFound });
+
+            return Ok(userDto);
         }
 
-        [HttpGet]
-        [Route("add")]
-        public IActionResult AddUser([FromBody]User user)
+        /// <summary>
+        /// POST: Creates a user with the default role and returns it in DTO format.
+        /// No authentication required.
+        /// </summary>
+        [HttpPost("Creation")]
+        [AllowAnonymous]
+        public async Task<IActionResult> AddNewUser([FromBody] UserSignUpModel userSignUpModel)
         {
-            return Ok();
+            var result = await _userService.AddUser(userSignUpModel);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
+
+            return Ok(result.Data);
         }
 
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]User user)
+        /// <summary>
+        /// GET: Returns the connected user in model format for update form.
+        /// </summary>
+        [HttpGet("FormUpdate")]
+        public async Task<IActionResult> ShowUpdateForm()
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-           
-           _userRepository.Add(user);
+            UserUpdateModel? userUpdateModel = await _userService.GetUserUpdateModelById(CurrentUserId);
+            if (userUpdateModel == null)
+                return NotFound(new { message = UserModelRessources.UserNotFound });
 
-            return Ok();
+            return Ok(userUpdateModel);
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
+        /// <summary>
+        /// PUT: Updates the connected user, keeping its role, and returns it in DTO format.
+        /// </summary>
+        [HttpPut("Modification")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserUpdateModel userUpdateModel)
         {
-            User user = _userRepository.FindById(id);
-            
-            if (user == null)
-                throw new ArgumentException("Invalid user Id:" + id);
+            var result = await _userService.UpdateUser(userUpdateModel, CurrentUserId);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
 
-            return Ok();
+            return Ok(result.Data);
         }
 
-        [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] User user)
+        /// <summary>
+        /// PUT: Changes the password of the connected user, after checking the old one.
+        /// </summary>
+        [HttpPut("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel changePasswordModel)
         {
-            // TODO: check required fields, if valid call service to update Trade and return Trade list
-            return Ok();
-        }
+            var result = await _userService.ChangePassword(changePasswordModel, CurrentUserId);
+            if (result.Errors.Any())
+                return BadRequest(result.Errors);
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteUser(int id)
-        {
-            User user = _userRepository.FindById(id);
-            
-            if (user == null)
-                throw new ArgumentException("Invalid user Id:" + id);
-
-            return Ok();
-        }
-
-        [HttpGet]
-        [Route("/secure/article-details")]
-        public async Task<ActionResult<List<User>>> GetAllUserArticles()
-        {
-            return Ok();
+            return Ok(result.Data);
         }
     }
 }
