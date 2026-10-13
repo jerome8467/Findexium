@@ -29,7 +29,18 @@ Prérequis : .NET 6 SDK, SQL Server (Express ou Developer), Visual Studio 2022.
 
 1. Cloner le dépôt.
 2. Dans `P7CreateRestApi/appsettings.json`, adapter la chaîne de connexion `DefaultConnection` à votre machine (`Server=.\\SQLEXPRESS` pour SQL Server Express, `Server=.` pour une instance par défaut).
-3. Créer la base : dans Visual Studio, **Outils → Gestionnaire de packages NuGet → Console du gestionnaire de packages**, projet par défaut `P7CreateRestApi`, puis :
+3. Dans le même fichier, vérifier la section `Jwt`. La clé fournie est **temporaire** : pour un usage réel, la remplacer par une valeur secrète longue, de préférence stockée dans une variable d'environnement et non dans le dépôt.
+
+```json
+"Jwt": {
+  "Key": "...",
+  "Issuer": "P7CreateRestApi",
+  "Audience": "P7CreateRestApi",
+  "ExpireMinutes": 60
+}
+```
+
+4. Créer la base : dans Visual Studio, **Outils → Gestionnaire de packages NuGet → Console du gestionnaire de packages**, projet par défaut `P7CreateRestApi`, puis :
 
 ```powershell
 Update-Database
